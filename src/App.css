@@ -1,0 +1,14 @@
+.bg{
+    background-image: url(/bg.jpeg);
+    background-size: contain;
+    position: fixed;
+    height: 100vh;
+    top: 70px;
+    z-index: -1;
+    width: 100vw;
+}
+.splash-img{
+    position: fixed;
+    bottom: -35px;
+    width: 100vw;
+}
