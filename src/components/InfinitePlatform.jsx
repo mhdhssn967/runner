@@ -1,9 +1,10 @@
-import React, { useRef } from 'react';
+import React, { useRef, forwardRef, useImperativeHandle } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { useGLTF, Clone } from '@react-three/drei';
 import SpawnManager from './SpawnManager';
+import CoinSpawner from './CoinSpawner';
 
-const InfinitePlatform = ({ isPlaying,setStrikeZoneCoordinates }) => {
+const InfinitePlatform = forwardRef(({ isPlaying }, ref) => {
   const { scene } = useGLTF('/platform.glb');
 
   const segmentLength = 87.3;
@@ -15,22 +16,35 @@ const InfinitePlatform = ({ isPlaying,setStrikeZoneCoordinates }) => {
 
   const segmentRefs = useRef([]);
   const spawnerRefs = useRef([]);
+  const coinSpawnerRefs = useRef([]);
+
+  // Track refs **per segment only**, do not push into global array
+  const allObstacleRefs = useRef([]);
+  const allCoinRefs = useRef([]);
 
   useFrame((state, delta) => {
     if (!isPlaying) return;
-    const frameSpeed = speed * (delta * 60);
+    const frameSpeed = speed * delta * 60;
 
     segmentRefs.current.forEach((group, i) => {
       if (!group) return;
+
       group.position.z += frameSpeed;
 
       if (group.position.z > resetThreshold) {
         group.position.z -= totalLength;
-        // Tell the specific spawner for this segment to randomize
+
+        // Randomize obstacles & coins only when segment resets
         spawnerRefs.current[i]?.randomize();
+        coinSpawnerRefs.current[i]?.randomize();
       }
     });
   });
+
+  useImperativeHandle(ref, () => ({
+    getAllObstacles: () => spawnerRefs.current.flatMap((s) => s.getObstacles?.() || []),
+    getAllCoins: () => coinSpawnerRefs.current.flatMap((c) => c.getCoins?.() || [])
+  }));
 
   return (
     <group>
@@ -40,22 +54,27 @@ const InfinitePlatform = ({ isPlaying,setStrikeZoneCoordinates }) => {
           ref={(el) => (segmentRefs.current[i] = el)}
           position={[0, 0, -i * segmentLength]}
         >
-          {/* Platform Model */}
           <group position={[0.2, 0.1, 0]}>
             <Clone object={scene} deep receiveShadow />
           </group>
 
-          {/* New Spawner Component */}
-          <SpawnManager 
+          {/* Obstacles */}
+          <SpawnManager
             ref={(el) => (spawnerRefs.current[i] = el)}
             segmentLength={segmentLength}
             lanePositions={lanePositions}
-            setStrikeZoneCoordinates={setStrikeZoneCoordinates}
+          />
+
+          {/* Coins */}
+          <CoinSpawner
+            ref={(el) => (coinSpawnerRefs.current[i] = el)}
+            segmentLength={segmentLength}
+            lanePositions={lanePositions}
           />
         </group>
       ))}
     </group>
   );
-};
+});
 
 export default InfinitePlatform;

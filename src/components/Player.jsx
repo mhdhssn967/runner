@@ -7,6 +7,7 @@ export default function Player({ isPlaying }) {
   const lanePositions = [-1.7, 0, 1.7]
   const [laneIndex, setLaneIndex] = useState(1)
   
+  
 
   const groupRef = useRef()
   const targetX = useRef(lanePositions[1])
@@ -125,7 +126,80 @@ useFrame((state, delta) => {
     // Smoothly return to floor height
     groupRef.current.position.y = THREE.MathUtils.lerp(groupRef.current.position.y, 0.3, 0.2);
   }
+  
 });
+
+useEffect(() => {
+  let touchStartX = 0;
+  let touchStartY = 0;
+  let touchEndX = 0;
+  let touchEndY = 0;
+
+  const minSwipeDistance = 30; // Minimum distance to consider as swipe
+
+  const handleTouchStart = (e) => {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+  };
+
+  const handleTouchEnd = (e) => {
+    touchEndX = e.changedTouches[0].clientX;
+    touchEndY = e.changedTouches[0].clientY;
+
+    const deltaX = touchEndX - touchStartX;
+    const deltaY = touchEndY - touchStartY;
+
+    // Horizontal swipe (left/right)
+    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > minSwipeDistance) {
+      if (deltaX > 0) {
+        // Swipe right
+        setLaneIndex((prev) => Math.min(prev + 1, lanePositions.length - 1));
+      } else {
+        // Swipe left
+        setLaneIndex((prev) => Math.max(prev - 1, 0));
+      }
+    }
+
+    // Vertical swipe (up)
+    if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > minSwipeDistance) {
+      if (deltaY < 0) {
+        // Swipe up → jump
+        if (isPlaying && !isJumping.current && jumpAction && runAction) {
+          isJumping.current = true;
+
+          jumpAction.reset();
+          jumpAction.setLoop(THREE.LoopOnce);
+          jumpAction.clampWhenFinished = true;
+          jumpAction.play();
+          runAction.crossFadeTo(jumpAction, 0.1, true);
+
+          setTimeout(() => {
+            isJumping.current = false;
+          }, 800);
+
+          const mixer = jumpAction.getMixer();
+          const onFinish = (event) => {
+            if (event.action === jumpAction) {
+              runAction.reset().fadeIn(0.2).play();
+              jumpAction.crossFadeTo(runAction, 0.2, true);
+              mixer.removeEventListener('finished', onFinish);
+            }
+          };
+          mixer.addEventListener('finished', onFinish);
+        }
+      }
+    }
+  };
+
+  window.addEventListener('touchstart', handleTouchStart);
+  window.addEventListener('touchend', handleTouchEnd);
+
+  return () => {
+    window.removeEventListener('touchstart', handleTouchStart);
+    window.removeEventListener('touchend', handleTouchEnd);
+  };
+}, [isPlaying, jumpAction, runAction, lanePositions]);
+
 
   return (
     <group

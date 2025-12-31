@@ -9,14 +9,14 @@ import { useRef, useState } from 'react'
 
 export default function Game({isPlaying}) {
   const playerGroupRef = useRef();
-
-  const [playerPosition,setPlayerPosition]=useState({x:0,y:0,z:0})
+  const platformRef = useRef();
+  const [score, setScore] = useState(0);
 
 
   return (
 
     <>
-    <HUD/>
+    <HUD score={score}/>
     <Canvas shadows gl={{ antialias: false, powerPreference: "high-performance" }}
   dpr={[1, 2]} style={{ width: '100vw', height: '100vh' }} >
       {/* <OrbitControls></OrbitControls> */}
@@ -45,8 +45,12 @@ export default function Game({isPlaying}) {
 
       {/* <RollingPath gameSpeed={gameSpeed} cylinderRadius={cylinderRadius} isPlaying={isPlaying}/> */}
       {/* <StraightPath/> */}
-      <InfinitePlatform isPlaying={isPlaying} playerRef={playerGroupRef}/>
-      <Player isPlaying={isPlaying} playerRef={playerGroupRef}/>
+      <InfinitePlatform ref={platformRef} isPlaying={isPlaying} />
+       <Player
+        isPlaying={isPlaying}
+        coinRefs={platformRef.current?.getAllCoins() || []}
+        setScore={setScore}
+      />
     </Canvas>
     </>
   )
