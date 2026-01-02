@@ -6,6 +6,7 @@ import React, {
 import { useFrame } from '@react-three/fiber';
 import { useGLTF, Clone } from '@react-three/drei';
 import SpawnManager from './SpawnManager';
+import CoinSpawner from './CoinSpawner';
 
 const InfinitePlatform = forwardRef(({ isPlaying }, ref) => {
   const { scene } = useGLTF('/platform.glb');
@@ -13,7 +14,7 @@ const InfinitePlatform = forwardRef(({ isPlaying }, ref) => {
   const segmentLength = 87.3;
   const numSegments = 4;
   const speed = 0.3;
-  const lanePositions = [-1.7, 0, 1.7];
+  const lanePositions = [-1.9, 0, 1.9];
   const totalLength = segmentLength * numSegments;
   const resetThreshold = 160;
 
@@ -51,27 +52,30 @@ const InfinitePlatform = forwardRef(({ isPlaying }, ref) => {
           position={[0, 0, -i * segmentLength]}
         >
           {/* Platform */}
-          <group position={[0.2, 0.1, 0]}>
+          <group position={[0.3, 0.1, 0]}>
             <Clone object={scene} deep receiveShadow />
           </group>
 
           {/* Spawner */}
+          <CoinSpawner/>
           
           <SpawnManager
-            ref={(el) => {
-              spawnerRefs.current[i] = el;
+  ref={(el) => {
+    spawnerRefs.current[i] = el;
 
-              if (el) {
-                // Collect obstacle refs ONCE
-                const obstacles = el.getObstacles?.();
-                if (obstacles) {
-                  allObstacleRefs.current.push(...obstacles);
-                }
-              }
-            }}
-            segmentLength={segmentLength}
-            lanePositions={lanePositions}
-          />
+    // ✅ REGISTER OBSTACLES ONLY ONCE
+    if (el && !el._registered) {
+      const obstacles = el.getObstacles?.();
+      if (obstacles) {
+        allObstacleRefs.current.push(...obstacles);
+        el._registered = true; // 🔐 prevents duplicates
+      }
+    }
+  }}
+  segmentLength={segmentLength}
+  lanePositions={lanePositions}
+/>
+
         </group>
       ))}
     </group>
