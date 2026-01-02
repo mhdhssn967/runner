@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { useGLTF, useAnimations } from '@react-three/drei'
 import * as THREE from 'three'
@@ -11,26 +11,30 @@ export default function Player({ isPlaying, obstacleRefs }) {
   const targetX = useRef(lanePositions[1])
   const isJumping = useRef(false)
 
-  // 🧱 Player Bounding Box
+  // Stable Bounding Box
   const playerBox = useRef(new THREE.Box3())
 
+  // Load GLTF
   const { scene, animations } = useGLTF('/banana.glb')
   const { actions } = useAnimations(animations, groupRef)
 
-  // --- ENABLE SHADOWS ---
-  useMemo(() => {
+  // --- PREVENT SHARED MATERIAL BUGS ---
+  useEffect(() => {
     scene.traverse((obj) => {
-      if (obj.isMesh) obj.castShadow = true
+      if (obj.isMesh) {
+        obj.castShadow = true
+        if (obj.material) {
+          obj.material = obj.material.clone()
+        }
+      }
     })
   }, [scene])
 
   // --- ANIMATION CONTROLS ---
-  const runAction = actions?.run
-  const jumpAction = actions?.jump
-
   useEffect(() => {
     if (!actions) return
-    Object.values(actions).forEach((action) => action.stop())
+
+    Object.values(actions).forEach((a) => a?.stop())
 
     if (!isPlaying) {
       actions.idle?.reset().fadeIn(0.3).play()
@@ -38,62 +42,40 @@ export default function Player({ isPlaying, obstacleRefs }) {
       actions.run?.reset().fadeIn(0.3).setLoop(THREE.LoopRepeat).play()
     }
 
-    return () => {
-      Object.values(actions).forEach((action) => action?.fadeOut(0.2))
-    }
+    return () =>
+      Object.values(actions).forEach((a) => a?.fadeOut(0.2))
   }, [actions, isPlaying])
 
-  // --- INPUT ---
+  // --- INPUT CONTROLS ---
   useEffect(() => {
     const handleKey = (e) => {
-      if (e.key === 'ArrowLeft')
-        setLaneIndex((prev) => Math.max(prev - 1, 0))
+      if (!isPlaying) return
 
-      if (e.key === 'ArrowRight')
-        setLaneIndex((prev) =>
-          Math.min(prev + 1, lanePositions.length - 1)
-        )
+      if (e.key === 'ArrowLeft') setLaneIndex((p) => Math.max(p - 1, 0))
+      if (e.key === 'ArrowRight') setLaneIndex((p) => Math.min(p + 1, 2))
 
-      if (
-        e.key === 'ArrowUp' &&
-        isPlaying &&
-        !isJumping.current &&
-        jumpAction &&
-        runAction
-      ) {
+      if (e.key === 'ArrowUp' && !isJumping.current && actions.jump) {
         isJumping.current = true
 
-        jumpAction.reset()
-        jumpAction.setLoop(THREE.LoopOnce)
-        jumpAction.clampWhenFinished = true
-        jumpAction.play()
-        runAction.crossFadeTo(jumpAction, 0.1, true)
+        actions.run?.fadeOut(0.1)
+        actions.jump.reset().setLoop(THREE.LoopOnce).play()
 
         setTimeout(() => {
           isJumping.current = false
+          if (isPlaying) actions.run?.reset().fadeIn(0.2).play()
         }, 800)
-
-        const mixer = jumpAction.getMixer()
-        const onFinish = (event) => {
-          if (event.action === jumpAction) {
-            runAction.reset().fadeIn(0.2).play()
-            jumpAction.crossFadeTo(runAction, 0.2, true)
-            mixer.removeEventListener('finished', onFinish)
-          }
-        }
-        mixer.addEventListener('finished', onFinish)
       }
     }
 
     window.addEventListener('keydown', handleKey)
     return () => window.removeEventListener('keydown', handleKey)
-  }, [runAction, jumpAction, isPlaying])
+  }, [actions, isPlaying])
 
   useEffect(() => {
     targetX.current = lanePositions[laneIndex]
   }, [laneIndex])
 
-  // --- FRAME LOOP ---
+  // --- GAME LOOP ---
   useFrame(() => {
     if (!groupRef.current) return
 
@@ -105,12 +87,12 @@ export default function Player({ isPlaying, obstacleRefs }) {
     )
 
     // Jump arc
-    if (isJumping.current && jumpAction) {
+    if (isJumping.current && actions.jump) {
       const progress =
-        jumpAction.time / jumpAction.getClip().duration
-      const jumpHeight = 1.5
-      const currentJumpY = Math.sin(progress * Math.PI) * jumpHeight
-      groupRef.current.position.y = 0.3 + currentJumpY
+        actions.jump.time / actions.jump.getClip().duration
+      const jumpHeight = 1.8
+      groupRef.current.position.y =
+        0.3 + Math.sin(progress * Math.PI) * jumpHeight
     } else {
       groupRef.current.position.y = THREE.MathUtils.lerp(
         groupRef.current.position.y,
@@ -119,19 +101,22 @@ export default function Player({ isPlaying, obstacleRefs }) {
       )
     }
 
-    // 🧠 COLLISION CHECK
+    // Update collision box
     playerBox.current.setFromObject(groupRef.current)
+    playerBox.current.expandByScalar(-0.1)
 
-    obstacleRefs?.forEach((obs) => {
-      if (!obs || !obs.visible) return
+    // Obstacle collision only
+    if (obstacleRefs) {
+      for (const obs of obstacleRefs) {
+        if (!obs || obs.visible === false) continue
 
-      const obsBox = obs.getBoundingBox?.()
-      if (!obsBox) return
-
-      if (playerBox.current.intersectsBox(obsBox)) {
-        console.log('🚨 COLLISION DETECTED')
+        const obsBox = obs.getBoundingBox?.()
+        if (obsBox && playerBox.current.intersectsBox(obsBox)) {
+          console.log('🚨 HIT OBSTACLE')
+          // Game over logic here
+        }
       }
-    })
+    }
   })
 
   return (
