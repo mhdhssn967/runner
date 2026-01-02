@@ -14,39 +14,34 @@ const SpawnManager = forwardRef(({ segmentLength, lanePositions }, ref) => {
   const obstacleRefs = useRef([]);
   const canSpawnRef = useRef(false);
 
-  // ⛔ Hide everything immediately
   useEffect(() => {
     obstacleRefs.current.forEach((obs) => {
-      if (!obs) return;
-      obs.visible = false;
+      if (obs) obs.visible = false;
     });
 
     const timer = setTimeout(() => {
       canSpawnRef.current = true;
-    }, 100);
+    }, 3000);
 
     return () => clearTimeout(timer);
   }, []);
 
   useImperativeHandle(ref, () => ({
     randomize: () => {
-      // 🚫 Do nothing before 5 seconds
       if (!canSpawnRef.current) return;
 
       obstacleRefs.current.forEach((obs) => {
         if (!obs) return;
-
-        if (Math.random() > obstacleFrequency) {
-          obs.visible = false;
-          return;
-        }
 
         obs.visible = true;
         obs.position.x =
           lanePositions[Math.floor(Math.random() * lanePositions.length)];
         obs.position.z = -Math.random() * segmentLength;
       });
-    }
+    },
+
+    // 🔑 EXPOSE OBSTACLES
+    getObstacles: () => obstacleRefs.current
   }));
 
   return (

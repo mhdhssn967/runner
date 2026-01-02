@@ -40,7 +40,7 @@ const Obstacle = forwardRef(({ type }, ref) => {
 
       return boundingBox.current;
     },
- getType: () => type,
+
     set visible(val) {
       if (groupRef.current) groupRef.current.visible = val;
     },
@@ -57,6 +57,7 @@ const Obstacle = forwardRef(({ type }, ref) => {
       <Clone
         object={models[type] || rock.scene}
         castShadow
+        
       />
     </group>
   );

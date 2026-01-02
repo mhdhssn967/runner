@@ -1,8 +1,11 @@
-import React, { useRef, forwardRef, useImperativeHandle } from 'react';
+import React, {
+  useRef,
+  forwardRef,
+  useImperativeHandle
+} from 'react';
 import { useFrame } from '@react-three/fiber';
 import { useGLTF, Clone } from '@react-three/drei';
 import SpawnManager from './SpawnManager';
-import CoinSpawner from './CoinSpawner';
 
 const InfinitePlatform = forwardRef(({ isPlaying }, ref) => {
   const { scene } = useGLTF('/platform.glb');
@@ -16,15 +19,11 @@ const InfinitePlatform = forwardRef(({ isPlaying }, ref) => {
 
   const segmentRefs = useRef([]);
   const spawnerRefs = useRef([]);
-  const coinSpawnerRefs = useRef([]);
-
-  // Track refs **per segment only**, do not push into global array
   const allObstacleRefs = useRef([]);
-  const allCoinRefs = useRef([]);
 
   useFrame((state, delta) => {
     if (!isPlaying) return;
-    const frameSpeed = speed * delta * 60;
+    const frameSpeed = speed * (delta * 60);
 
     segmentRefs.current.forEach((group, i) => {
       if (!group) return;
@@ -33,17 +32,14 @@ const InfinitePlatform = forwardRef(({ isPlaying }, ref) => {
 
       if (group.position.z > resetThreshold) {
         group.position.z -= totalLength;
-
-        // Randomize obstacles & coins only when segment resets
         spawnerRefs.current[i]?.randomize();
-        coinSpawnerRefs.current[i]?.randomize();
       }
     });
   });
 
+  // 🔑 Expose all obstacles to parent (Game → Player)
   useImperativeHandle(ref, () => ({
-    getAllObstacles: () => spawnerRefs.current.flatMap((s) => s.getObstacles?.() || []),
-    getAllCoins: () => coinSpawnerRefs.current.flatMap((c) => c.getCoins?.() || [])
+    getAllObstacles: () => allObstacleRefs.current
   }));
 
   return (
@@ -54,20 +50,25 @@ const InfinitePlatform = forwardRef(({ isPlaying }, ref) => {
           ref={(el) => (segmentRefs.current[i] = el)}
           position={[0, 0, -i * segmentLength]}
         >
+          {/* Platform */}
           <group position={[0.2, 0.1, 0]}>
             <Clone object={scene} deep receiveShadow />
           </group>
 
-          {/* Obstacles */}
+          {/* Spawner */}
+          
           <SpawnManager
-            ref={(el) => (spawnerRefs.current[i] = el)}
-            segmentLength={segmentLength}
-            lanePositions={lanePositions}
-          />
+            ref={(el) => {
+              spawnerRefs.current[i] = el;
 
-          {/* Coins */}
-          <CoinSpawner
-            ref={(el) => (coinSpawnerRefs.current[i] = el)}
+              if (el) {
+                // Collect obstacle refs ONCE
+                const obstacles = el.getObstacles?.();
+                if (obstacles) {
+                  allObstacleRefs.current.push(...obstacles);
+                }
+              }
+            }}
             segmentLength={segmentLength}
             lanePositions={lanePositions}
           />

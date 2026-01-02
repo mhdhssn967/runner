@@ -47,10 +47,9 @@ export default function Game({isPlaying}) {
       {/* <StraightPath/> */}
       <InfinitePlatform ref={platformRef} isPlaying={isPlaying} />
        <Player
-        isPlaying={isPlaying}
-        coinRefs={platformRef.current?.getAllCoins() || []}
-        setScore={setScore}
-      />
+  isPlaying={isPlaying}
+  obstacleRefs={platformRef.current?.getAllObstacles()}
+/>
     </Canvas>
     </>
   )
