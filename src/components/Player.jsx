@@ -4,19 +4,23 @@ import { useState, useEffect, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { useGLTF, useAnimations } from '@react-three/drei'
 import * as THREE from 'three'
+import './Player.css'
 
 export default function Player({
   isPlaying,
   obstacleRefs,
   coinRefs,
+  setIsPlaying,
   platformRef
 }) {
   const lanePositions = [-1.7, 0, 1.7]
   const [laneIndex, setLaneIndex] = useState(1)
 
   const [score,setScore]=useState(0)
-  
-console.log(score);
+  const [gameOver, setGameOver] = useState(false)
+  const isDead = useRef(false);
+// --- ANIMATION CONTROLS ---
+
 
   const groupRef = useRef()
   const targetX = useRef(lanePositions[1])
@@ -28,6 +32,7 @@ console.log(score);
   // Load GLTF
   const { scene, animations } = useGLTF('/banana.glb')
   const { actions } = useAnimations(animations, groupRef)
+
 
   // --- PREVENT SHARED MATERIAL BUGS ---
   useEffect(() => {
@@ -42,20 +47,40 @@ console.log(score);
   }, [scene])
 
   // --- ANIMATION CONTROLS ---
-  useEffect(() => {
-    if (!actions) return
+  // --- REPLACE BOTH PREVIOUS ANIMATION useEffects WITH THIS ---
+useEffect(() => {
+  if (!actions) return
 
+  if (isPlaying) {
+    // 🏃 GAME START: Reset everything
+    isDead.current = false
+    setGameOver(false)
+    
+    // Stop any "frozen" animations
     Object.values(actions).forEach((a) => a?.stop())
-
-    if (!isPlaying) {
-      actions.idle?.reset().fadeIn(0.3).play()
-    } else {
-      actions.run?.reset().fadeIn(0.3).setLoop(THREE.LoopRepeat).play()
+    
+    // Play run
+    if (actions.run) {
+      actions.run.reset().fadeIn(0.3).setLoop(THREE.LoopRepeat).play()
     }
+  } else {
+    // 🛑 GAME STOPPED: Logic for Idle vs Death
+    if (isDead.current) {
+      // If we are dead, DO NOT play idle. 
+      // The handleDeath function is already handling the "fall" animation.
+      // We stop the run animation so it doesn't loop.
+      actions.run?.fadeOut(0.2)
+    } else {
+      // Normal pause or start screen: Play idle
+      Object.values(actions).forEach((a) => a?.stop())
+      actions.idle?.reset().fadeIn(0.3).play()
+    }
+  }
+}, [actions, isPlaying])
 
-    return () =>
-      Object.values(actions).forEach((a) => a?.fadeOut(0.2))
-  }, [actions, isPlaying])
+
+
+
 
   // --- INPUT CONTROLS ---
   useEffect(() => {
@@ -88,7 +113,7 @@ console.log(score);
 
   // --- GAME LOOP ---
   useFrame(() => {
-    if (!groupRef.current) return
+    if (!groupRef.current || isDead.current) return
 
     const currentPlatformSpeed = platformRef.current?.getSpeed() || 0.3
 
@@ -147,16 +172,20 @@ console.log(score);
     playerBox.current.expandByScalar(-0.1)
 
     // 🧱 Obstacle collision
-    if (obstacleRefs) {
+    if (obstacleRefs && isPlaying) {
+      const obstacleRefs = platformRef.current?.getAllObstacles() || [];
+      
       for (const obs of obstacleRefs) {
-        if (!obs || obs.visible === false) continue
+        if (!obs || obs.visible === false) continue;
 
-        const obsBox = obs.getBoundingBox?.()
+        const obsBox = obs.getBoundingBox?.();
         if (obsBox && playerBox.current.intersectsBox(obsBox)) {
-          // console.log('🚨 HIT OBSTACLE')
+          handleDeath();
+          break;
         }
-      }
     }
+  }
+  
 
     // 🟡 Coin collision (SAFE)
     // Coin collision
@@ -175,32 +204,90 @@ if (coinRefs && !isJumping.current) { // Added !isJumping.current here
 
   })
 
-  return (
-   <>
-  {/* UI SCORE */}
-  <Html
-    position={[2, 7, 0]}
-    center
-    style={{
-      pointerEvents: 'none',
-      fontSize: '24px',
-      fontWeight: 'bold',
-      color: 'black',
-    }}
-  >
-    <div style={{width:'200px'}}>Score: {score}</div>
-  </Html>
+const handleDeath = () => {
+  if (isDead.current) return
+  isDead.current = true
+  
+  // 1. Stop the world immediately
+  setIsPlaying(false) 
+  
+  // 2. Play the fall animation
+  if (actions.fall) {
+    // Force stop run/idle so they don't override the fall
+    actions.run?.stop()
+    actions.idle?.stop()
+    actions.jump?.stop()
 
-  {/* PLAYER */}
-  <group
-    ref={groupRef}
-    position={[lanePositions[1], 0.3, 6]}
-    rotation={[0, isPlaying ? Math.PI : 0, 0]}
-    scale={[0.4, 0.4, 0.4]}
-  >
-    <primitive object={scene} />
-  </group>
-</>
+    actions.fall
+      .reset()
+      .setLoop(THREE.LoopOnce, 1)
+      .play()
+    
+    // 🔥 This keeps the banana on the floor
+    actions.fall.clampWhenFinished = true 
+  }
 
-  )
+  // 3. Show UI
+  setTimeout(() => {
+    setGameOver(true)
+  }, 2000)
+}
+
+ return (
+  <>
+    <Html
+      position={[0, 0, 0]}
+      fullscreen
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        pointerEvents: 'none', // Allows clicking through empty space
+        userSelect: 'none'
+      }}
+    >
+      {/* Persistent Score */}
+      <div style={{ position: 'absolute', top: '1px', fontSize: '30px', fontWeight: 'bold', color: 'green',right:'50px' }}>
+        Score: {score}
+      </div>
+
+      {/* Game Over Screen */}
+      {gameOver && (
+        <div className='game-over' style={{
+          pointerEvents: 'auto', // Re-enable clicks for the button
+          background: 'rgba(0,0,0,0.8)',
+          padding: '40px',
+          borderRadius: '20px',
+          textAlign: 'center',
+          color: 'white',
+          fontFamily: 'sans-serif'
+        }}>
+          <h1 style={{ fontSize: '48px', margin: '0 0 20px 0' }}>SPLAT!</h1>
+          <p style={{ fontSize: '24px' }}>Final Score: {score}</p>
+          <button 
+            onClick={() => window.location.reload()} // Simple reload for full reset
+            style={{
+              marginTop: '20px',
+              padding: '12px 24px',
+              fontSize: '20px',
+              cursor: 'pointer',
+              borderRadius: '10px',
+              border: 'none',
+              background: '#ffe100',
+              color: 'black',
+              fontWeight: 'bold'
+            }}
+          >
+            TRY AGAIN
+          </button>
+        </div>
+      )}
+    </Html>
+
+    <group ref={groupRef} position={[lanePositions[1], 0.3, 6]} rotation={[0, Math.PI , 0]} scale={[0.4, 0.4, 0.4]}>
+      <primitive object={scene} />
+    </group>
+  </>
+)
 }

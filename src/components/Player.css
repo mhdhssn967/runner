@@ -1,0 +1,12 @@
+.game-over{
+    transition: 2s;
+    animation: gameOverDiv 1s;
+}
+@keyframes gameOverDiv{
+    0%{
+        transform: scale(0);
+    }
+    100%{
+        transform: scale(1);
+    }
+}

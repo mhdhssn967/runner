@@ -20,7 +20,7 @@ const InfinitePlatform = forwardRef(({ isPlaying }, ref) => {
 
   const INITIAL_SPEED = 0.3
   const MAX_SPEED = 1.5
-  const ACCELERATION_RATE = 0.00001 // Adjust this to change how fast it gets harder
+  const ACCELERATION_RATE = 0.0001 // Adjust this to change how fast it gets harder
   const currentSpeed = useRef(INITIAL_SPEED)
 
   const segmentRefs = useRef([])

@@ -9,7 +9,7 @@ const App = () => {
 
   return (
     <div>
-      <Game isPlaying={isPlaying}/>
+      <Game isPlaying={isPlaying} setIsPlaying={setIsPlaying}/>
       {!isPlaying&&<>
         <GameControls setIsPlaying={setIsPlaying} isPlaying={isPlaying}/>
         {/* <img className='splash-img' src="./splash.png" alt="" /> */}
