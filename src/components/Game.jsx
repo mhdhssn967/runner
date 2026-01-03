@@ -7,11 +7,12 @@ import { useRef, useState } from 'react'
 
 export default function Game({ isPlaying }) {
   const platformRef = useRef()
-  const [score, setScore] = useState(0)
+
+
 
   return (
     <>
-      <HUD score={score} />
+      <HUD />
 
       <Canvas
         shadows
@@ -49,9 +50,12 @@ export default function Game({ isPlaying }) {
         />
 
         <Player
-          isPlaying={isPlaying}
-          obstacleRefs={platformRef.current?.getAllObstacles()}
-        />
+  isPlaying={isPlaying}
+  obstacleRefs={platformRef.current?.getAllObstacles()}
+  coinRefs={platformRef.current?.getAllCoins()}
+  platformRef={platformRef}
+/>
+
       </Canvas>
     </>
   )
