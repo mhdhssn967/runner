@@ -80,7 +80,72 @@ useEffect(() => {
 
 
 
+// Mobile controls
+// --- MOBILE SWIPE CONTROLS ---
+useEffect(() => {
+  let touchStartX = 0
+  let touchStartY = 0
+  const minSwipeDistance = 30 // Minimum pixels to register as a swipe
 
+  const handleTouchStart = (e) => {
+    touchStartX = e.touches[0].clientX
+    touchStartY = e.touches[0].clientY
+  }
+
+  const handleTouchEnd = (e) => {
+    if (!isPlaying) return
+
+    const touchEndX = e.changedTouches[0].clientX
+    const touchEndY = e.changedTouches[0].clientY
+
+    const dx = touchEndX - touchStartX
+    const dy = touchEndY - touchStartY
+
+    // Check if horizontal swipe is stronger than vertical
+    if (Math.abs(dx) > Math.abs(dy)) {
+      if (Math.abs(dx) > minSwipeDistance) {
+        if (dx > 0) {
+          // Swipe Right
+          setLaneIndex((p) => Math.min(p + 1, 2))
+        } else {
+          // Swipe Left
+          setLaneIndex((p) => Math.max(p - 1, 0))
+        }
+      }
+    } else {
+      // Vertical swipe logic
+      if (Math.abs(dy) > minSwipeDistance) {
+        if (dy < 0) {
+          // Swipe Up (Negative Y is up on screen)
+          if (!isJumping.current && actions.jump) {
+            triggerJump()
+          }
+        }
+      }
+    }
+  }
+
+  window.addEventListener('touchstart', handleTouchStart)
+  window.addEventListener('touchend', handleTouchEnd)
+  
+  return () => {
+    window.removeEventListener('touchstart', handleTouchStart)
+    window.removeEventListener('touchend', handleTouchEnd)
+  }
+}, [actions, isPlaying])
+
+const triggerJump = () => {
+  if (isJumping.current || !actions.jump) return
+  
+  isJumping.current = true
+  actions.run?.fadeOut(0.1)
+  actions.jump.reset().setLoop(THREE.LoopOnce).play()
+
+  setTimeout(() => {
+    isJumping.current = false
+    if (isPlaying) actions.run?.reset().fadeIn(0.2).play()
+  }, 800)
+}
 
   // --- INPUT CONTROLS ---
   useEffect(() => {
