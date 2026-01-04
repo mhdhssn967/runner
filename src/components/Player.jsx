@@ -297,7 +297,7 @@ const handleDeath = () => {
   // 3. Show UI
   setTimeout(() => {
     setGameOver(true)
-  }, 3000)
+  }, 5000)
 }
 
  return (

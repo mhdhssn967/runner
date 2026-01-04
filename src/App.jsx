@@ -4,19 +4,22 @@ import GameControls from './components/GameControls'
 import './App.css'
 
 const App = () => {
-
-  const [isPlaying,setIsPlaying]=useState(false)
-
-  const [isDeadState,setIsDeadState]=useState(false)
+  const [isPlaying, setIsPlaying] = useState(false)
+  const [isDeadState, setIsDeadState] = useState(false)
 
   return (
     <div>
-      <Game isPlaying={isPlaying} setIsPlaying={setIsPlaying} setIsDeadState={setIsDeadState}/>
-      {(!isPlaying&&!isDeadState)&&<>
-        <GameControls setIsPlaying={setIsPlaying} isPlaying={isPlaying}/>
-        {/* <img className='splash-img' src="./splash.png" alt="" /> */}
-      </>}
-      <div className='bg'></div>
+      <Game
+        isPlaying={isPlaying}
+        setIsPlaying={setIsPlaying}
+        setIsDeadState={setIsDeadState}
+      />
+
+      {(!isPlaying && !isDeadState) && (
+        <GameControls setIsPlaying={setIsPlaying} isPlaying={isPlaying} />
+      )}
+
+      <div className="bg"></div>
     </div>
   )
 }
