@@ -6,7 +6,7 @@ import React, {
 import { useGLTF, Clone } from '@react-three/drei';
 import * as THREE from 'three';
 
-const HITBOX_MARGIN = 0.15; // 🔧 Tweak this (0.2–0.4 ideal)
+const HITBOX_MARGIN = 0.05; // 🔧 Tweak this (0.2–0.4 ideal)
 
 const Obstacle = forwardRef(({ type }, ref) => {
   const rock = useGLTF('/rock.glb');

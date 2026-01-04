@@ -9,7 +9,7 @@ import SpawnManager from './SpawnManager'
 import CoinManager from './CoinManager'
 
 const InfinitePlatform = forwardRef(({ isPlaying }, ref) => {
-  const { scene } = useGLTF('/platform.glb')
+  const { scene } = useGLTF('/platform_new.glb')
   
 
   const segmentLength = 87.3
@@ -73,7 +73,7 @@ const InfinitePlatform = forwardRef(({ isPlaying }, ref) => {
           position={[0, 0, -i * segmentLength]}
         >
           {/* Platform */}
-          <group position={[0.2, 0.1, 0]}>
+          <group position={[0.2, 0.01, 0]}>
             <Clone object={scene} deep receiveShadow />
           </group>
 
