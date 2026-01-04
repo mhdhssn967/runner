@@ -11,7 +11,8 @@ export default function Player({
   obstacleRefs,
   coinRefs,
   setIsPlaying,
-  platformRef
+  platformRef,
+  setIsDeadState
 }) {
   const lanePositions = [-1.7, 0, 1.7]
   const [laneIndex, setLaneIndex] = useState(1)
@@ -275,6 +276,7 @@ const handleDeath = () => {
   
   // 1. Stop the world immediately
   setIsPlaying(false) 
+  setIsDeadState(true)
   
   // 2. Play the fall animation
   if (actions.fall) {

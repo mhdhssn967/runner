@@ -6,7 +6,7 @@ const CoinManager = forwardRef(({ segmentLength, lanePositions }, ref) => {
   
   // Define how many coins per line and how many lines per segment
   const COINS_PER_LINE = 5
-  const LINE_SPACING = 2 // distance between coins in a line
+  const LINE_SPACING = 4 // distance between coins in a line
   const NUM_LINES = 3    // how many separate lines of coins per segment
 
   // Create a flat array for the initial render (Total coins = 15)

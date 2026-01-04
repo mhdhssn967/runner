@@ -7,10 +7,12 @@ const App = () => {
 
   const [isPlaying,setIsPlaying]=useState(false)
 
+  const [isDeadState,setIsDeadState]=useState(false)
+
   return (
     <div>
-      <Game isPlaying={isPlaying} setIsPlaying={setIsPlaying}/>
-      {!isPlaying&&<>
+      <Game isPlaying={isPlaying} setIsPlaying={setIsPlaying} setIsDeadState={setIsDeadState}/>
+      {(!isPlaying&&!isDeadState)&&<>
         <GameControls setIsPlaying={setIsPlaying} isPlaying={isPlaying}/>
         {/* <img className='splash-img' src="./splash.png" alt="" /> */}
       </>}

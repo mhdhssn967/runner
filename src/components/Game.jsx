@@ -5,7 +5,7 @@ import Player from './Player'
 import HUD from './HUD'
 import { useRef, useState } from 'react'
 
-export default function Game({ isPlaying,setIsPlaying }) {
+export default function Game({ isPlaying,setIsPlaying,setIsDeadState }) {
   const platformRef = useRef()
 
 
@@ -55,6 +55,7 @@ export default function Game({ isPlaying,setIsPlaying }) {
   coinRefs={platformRef.current?.getAllCoins()}
   platformRef={platformRef}
   setIsPlaying={setIsPlaying}
+  setIsDeadState={setIsDeadState}
 />
 
       </Canvas>
