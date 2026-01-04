@@ -4,10 +4,15 @@ export default function LoadingScreen() {
   const { progress } = useProgress()
 
   return (
-    <Html center>
-      <div className="splash-screen">
-        <h1>Loading</h1>
-        <p>{progress.toFixed(0)}%</p>
+    <Html fullscreen>
+      <div className="loading-screen">
+        <img src="/splash_log.png" alt="Logo" className="loading-logo" />
+
+        <div className="spinner" />
+
+        <p className="loading-text">
+          {/* {progress.toFixed(0)}% */}
+        </p>
       </div>
     </Html>
   )
