@@ -281,6 +281,7 @@ const handleDeath = () => {
   isDead.current = true
 
   // 🔊 1. Play DEATH SFX first
+  soundManager.stop('bg') 
   soundManager.play('death')
 
   // ⏸ Stop gameplay
@@ -302,21 +303,12 @@ const handleDeath = () => {
   }
 
   // ⏳ 2. Wait for death sound to finish, THEN play game over music
-  const deathDuration =
-    soundManager.getDuration('death') || 1200 // fallback (ms)
+ 
 
   setTimeout(() => {
     setGameOver(true)
-    soundManager.play('game_over')
-  }, deathDuration)
-}
-
-
-  // 3. Show UI
-  setTimeout(() => {
-    setGameOver(true)
-    soundManager.play('game_over')
-  }, 5000)
+    soundManager.play('gameover')
+  }, 2000)
 }
 
  return (

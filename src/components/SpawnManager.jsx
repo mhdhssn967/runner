@@ -37,6 +37,7 @@ const SpawnManager = forwardRef(({ segmentLength, lanePositions }, ref) => {
         obs.position.x =
           lanePositions[Math.floor(Math.random() * lanePositions.length)];
         obs.position.z = -Math.random() * segmentLength;
+        obs.position.y = 0.2;
       });
     },
 

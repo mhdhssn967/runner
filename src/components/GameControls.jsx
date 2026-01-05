@@ -1,5 +1,5 @@
 import { PlayCircleIcon, ArrowLeft, ArrowRight, ArrowUp } from 'lucide-react'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { soundManager } from '../audio/SoundManager'
 
 const GameControls = ({ isPlaying, setIsPlaying }) => {
@@ -75,13 +75,23 @@ const hintItem = {
   fontWeight:'100'
 }
 
-const startPlay=()=>{
-            soundManager.load('coin', '/sounds/coin.ogg', 0.5)
-            soundManager.load('jump', '/sounds/jump.ogg', 0.2)
-            soundManager.load('death', '/sounds/death.ogg', 0.6)
-            soundManager.load('death', '/sounds/game_over.ogg', 0.6)
-  setIsPlaying(true)
-}
+
+
+useEffect(() => {
+    // 🎵 Load all sounds once
+    soundManager.load('coin', '/sounds/coin.ogg', 0.1)
+    soundManager.load('jump', '/sounds/jump.ogg', 0.2)
+    soundManager.load('death', '/sounds/death.ogg', 0.6)
+    soundManager.load('gameover', '/sounds/game_over.ogg', 0.6)
+
+    // 🎶 Background music (loop = true)
+    soundManager.load('bg', '/sounds/bgm.ogg', 0.4, true)
+  }, [])
+
+  const startPlay = () => {
+    soundManager.playLoop('bg') // ✅ start bg music
+    setIsPlaying(true)
+  }
 
   return (
     <div style={wrapperStyle}>
