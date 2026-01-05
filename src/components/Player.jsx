@@ -120,6 +120,7 @@ useEffect(() => {
         if (dy < 0) {
           // Swipe Up (Negative Y is up on screen)
           if (!isJumping.current && actions.jump) {
+            soundManager.play('jump')
             triggerJump()
           }
         }
@@ -137,6 +138,7 @@ useEffect(() => {
 }, [actions, isPlaying])
 
 const triggerJump = () => {
+  
   if (isJumping.current || !actions.jump) return
   
   isJumping.current = true
@@ -153,7 +155,7 @@ const triggerJump = () => {
   useEffect(() => {
     const handleKey = (e) => {
       if (!isPlaying) return
-
+soundManager.play('jump')
       if (e.key === 'ArrowLeft') setLaneIndex((p) => Math.max(p - 1, 0))
       if (e.key === 'ArrowRight') setLaneIndex((p) => Math.min(p + 1, 2))
 
