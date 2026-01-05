@@ -1,6 +1,7 @@
 import { PlayCircleIcon, ArrowLeft, ArrowRight, ArrowUp } from 'lucide-react'
 import React, { useEffect } from 'react'
 import { soundManager } from '../audio/SoundManager'
+import './playbutton.css'
 
 const GameControls = ({ isPlaying, setIsPlaying }) => {
 
@@ -13,7 +14,7 @@ const GameControls = ({ isPlaying, setIsPlaying }) => {
   flexDirection: 'column',
   alignItems: 'center',
   gap: '18px',
-  marginBottom:'90px'
+  marginBottom:'110px'
 }
 
 const buttonStyle = {
@@ -105,7 +106,10 @@ useEffect(() => {
   return (
     <div style={wrapperStyle}>
       {/* PLAY BUTTON */}
-      <div
+      <button class="play-button" onClick={startPlay}>
+  PLAY
+</button>
+      {/* <div
         style={buttonStyle}
         onClick={startPlay}
         onMouseDown={(e) => {
@@ -120,9 +124,10 @@ useEffect(() => {
           `
         }}
       >
+        
         <PlayCircleIcon style={iconStyle} />
         <div style={shineStyle} />
-      </div>
+      </div> */}
 
       {/* CONTROLS HELP */}
       <div style={hintWrapper}>
