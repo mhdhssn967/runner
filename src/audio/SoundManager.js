@@ -11,6 +11,11 @@ class SoundManager {
     audio.preload = 'auto'
     this.sounds[name] = audio
   }
+  getDuration(name) {
+  const sound = this.sounds[name]
+  return sound ? sound.duration * 1000 : 0
+}
+
 
   play(name) {
     if (!this.enabled) return

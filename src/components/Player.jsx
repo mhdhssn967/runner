@@ -279,14 +279,16 @@ if (coinRefs && !isJumping.current) { // Added !isJumping.current here
 const handleDeath = () => {
   if (isDead.current) return
   isDead.current = true
-  
-  // 1. Stop the world immediately
-  setIsPlaying(false) 
+
+  // 🔊 1. Play DEATH SFX first
+  soundManager.play('death')
+
+  // ⏸ Stop gameplay
+  setIsPlaying(false)
   setIsDeadState(true)
-  
-  // 2. Play the fall animation
+
+  // 🎬 Play fall animation
   if (actions.fall) {
-    // Force stop run/idle so they don't override the fall
     actions.run?.stop()
     actions.idle?.stop()
     actions.jump?.stop()
@@ -295,14 +297,25 @@ const handleDeath = () => {
       .reset()
       .setLoop(THREE.LoopOnce, 1)
       .play()
-    
-    // 🔥 This keeps the banana on the floor
-    actions.fall.clampWhenFinished = true 
+
+    actions.fall.clampWhenFinished = true
   }
+
+  // ⏳ 2. Wait for death sound to finish, THEN play game over music
+  const deathDuration =
+    soundManager.getDuration('death') || 1200 // fallback (ms)
+
+  setTimeout(() => {
+    setGameOver(true)
+    soundManager.play('game_over')
+  }, deathDuration)
+}
+
 
   // 3. Show UI
   setTimeout(() => {
     setGameOver(true)
+    soundManager.play('game_over')
   }, 5000)
 }
 

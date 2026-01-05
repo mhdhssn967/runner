@@ -79,6 +79,7 @@ const startPlay=()=>{
             soundManager.load('coin', '/sounds/coin.ogg', 0.5)
             soundManager.load('jump', '/sounds/jump.ogg', 0.2)
             soundManager.load('death', '/sounds/death.ogg', 0.6)
+            soundManager.load('death', '/sounds/game_over.ogg', 0.6)
   setIsPlaying(true)
 }
 
