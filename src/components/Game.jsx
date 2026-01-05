@@ -6,8 +6,11 @@ import InfinitePlatform from './InfinitePlatform'
 import Player from './Player'
 import HUD from './HUD'
 import LoadingScreen from './LoadingScreen'
+import GameControls from './GameControls'
 
-export default function Game({ isPlaying, setIsPlaying, setIsDeadState }) {
+import { Html } from '@react-three/drei'
+
+export default function Game({ isDeadState,isPlaying, setIsPlaying, setIsDeadState }) {
   const platformRef = useRef()
 
   return (
@@ -23,6 +26,14 @@ export default function Game({ isPlaying, setIsPlaying, setIsDeadState }) {
         
         {/* ⏳ BLOCK RENDER UNTIL ASSETS LOAD */}
         <Suspense fallback={<LoadingScreen />}>
+        {(!isPlaying && !isDeadState) && (
+        <Html>
+          <div style={{height:'60vh',display:'flex',flexDirection:'column',justifyContent:'end'}}>
+            <GameControls setIsPlaying={setIsPlaying} isPlaying={isPlaying} />
+          </div>
+        </Html>
+      )}
+
           <PerspectiveCamera
             makeDefault
             position={[0, 4, 18]}

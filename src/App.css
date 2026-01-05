@@ -15,13 +15,14 @@
 .loading-screen {
   width: 100vw;
   height: 100vh;
-  background-color: #eed93e;
+  background-color: #fef301;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   gap: 24px;
   font-family: sans-serif;
+  z-index: 1000;
 }
 
 .loading-logo {

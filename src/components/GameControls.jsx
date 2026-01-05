@@ -1,14 +1,14 @@
 import { PlayCircleIcon, ArrowLeft, ArrowRight, ArrowUp } from 'lucide-react'
 import React from 'react'
+import { soundManager } from '../audio/SoundManager'
 
 const GameControls = ({ isPlaying, setIsPlaying }) => {
 
     const wrapperStyle = {
   position: 'fixed',
-  top: '75%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
-  zIndex: 1000,
+//   zIndex: -1,
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
@@ -33,6 +33,7 @@ const buttonStyle = {
   justifyContent: 'center',
   cursor: 'pointer',
   transition: 'transform 0.12s ease, box-shadow 0.12s ease',
+  marginBottom:'30px'
 }
 
 const shineStyle = {
@@ -74,12 +75,19 @@ const hintItem = {
   fontWeight:'100'
 }
 
+const startPlay=()=>{
+            soundManager.load('coin', '/sounds/coin.ogg', 0.5)
+            soundManager.load('jump', '/sounds/jump.ogg', 0.2)
+            soundManager.load('death', '/sounds/death.ogg', 0.6)
+  setIsPlaying(true)
+}
+
   return (
     <div style={wrapperStyle}>
       {/* PLAY BUTTON */}
       <div
         style={buttonStyle}
-        onClick={() => setIsPlaying(true)}
+        onClick={startPlay}
         onMouseDown={(e) => {
           e.currentTarget.style.transform = 'translateY(8px)'
           e.currentTarget.style.boxShadow = '0 6px 0 #b57f00'
@@ -105,7 +113,7 @@ const hintItem = {
           <ArrowRight size={28} /> Swipe Right move right
         </div>
         <div style={hintItem}>
-          <ArrowUp size={28} /> Swipe Up to jump
+          <ArrowUp size={28} /> Swipe Up jump
         </div>
       </div>
     </div>

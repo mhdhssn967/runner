@@ -5,6 +5,7 @@ import { useFrame } from '@react-three/fiber'
 import { useGLTF, useAnimations } from '@react-three/drei'
 import * as THREE from 'three'
 import './Player.css'
+import { soundManager } from '../audio/SoundManager'
 
 export default function Player({
   isPlaying,
@@ -157,6 +158,7 @@ const triggerJump = () => {
       if (e.key === 'ArrowRight') setLaneIndex((p) => Math.min(p + 1, 2))
 
       if (e.key === 'ArrowUp' && !isJumping.current && actions.jump) {
+        soundManager.play('jump')
         isJumping.current = true
 
         actions.run?.fadeOut(0.1)
@@ -220,6 +222,7 @@ const triggerJump = () => {
 
     // Jump arc
     if (isJumping.current && actions.jump) {
+      
       const progress =
         actions.jump.time / actions.jump.getClip().duration
       const jumpHeight = 1.8
@@ -261,6 +264,7 @@ if (coinRefs && !isJumping.current) { // Added !isJumping.current here
 
     const coinBox = coin.getBoundingBox?.()
     if (coinBox && playerBox.current.intersectsBox(coinBox)) {
+      soundManager.play('coin')
       coin.collect()
       setScore((s) => s + 1)
     }

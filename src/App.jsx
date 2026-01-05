@@ -13,12 +13,10 @@ const App = () => {
         isPlaying={isPlaying}
         setIsPlaying={setIsPlaying}
         setIsDeadState={setIsDeadState}
+        isDeadState={isDeadState}
       />
 
-      {(!isPlaying && !isDeadState) && (
-        <GameControls setIsPlaying={setIsPlaying} isPlaying={isPlaying} />
-      )}
-
+      
       <div className="bg"></div>
     </div>
   )

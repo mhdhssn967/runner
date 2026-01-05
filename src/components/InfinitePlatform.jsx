@@ -73,7 +73,7 @@ const InfinitePlatform = forwardRef(({ isPlaying }, ref) => {
           position={[0, 0, -i * segmentLength]}
         >
           {/* Platform */}
-          <group position={[0.2, 0.01, 0]}>
+          <group position={[0, 0.01, 0]}>
             <Clone object={scene} deep receiveShadow />
           </group>
 
