@@ -13,6 +13,7 @@ const GameControls = ({ isPlaying, setIsPlaying }) => {
   flexDirection: 'column',
   alignItems: 'center',
   gap: '18px',
+  marginBottom:'90px'
 }
 
 const buttonStyle = {
