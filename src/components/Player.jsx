@@ -308,7 +308,7 @@ const handleDeath = () => {
   setTimeout(() => {
     setGameOver(true)
     soundManager.play('gameover')
-  }, 2000)
+  }, 100)
 }
 
  return (

@@ -77,8 +77,15 @@ const hintItem = {
 }
 
 
+function requestFullscreen() {
+  const el = document.documentElement
 
+  if (el.requestFullscreen) el.requestFullscreen()
+  else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen() // Safari
+  else if (el.msRequestFullscreen) el.msRequestFullscreen() // IE
+}
 useEffect(() => {
+  
     // 🎵 Load all sounds once
     soundManager.load('coin', '/sounds/coin.ogg', 0.1)
     soundManager.load('jump', '/sounds/jump.ogg', 0.2)
@@ -90,6 +97,7 @@ useEffect(() => {
   }, [])
 
   const startPlay = () => {
+    requestFullscreen()
     soundManager.playLoop('bg') // ✅ start bg music
     setIsPlaying(true)
   }
