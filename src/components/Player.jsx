@@ -160,7 +160,6 @@ soundManager.play('jump')
       if (e.key === 'ArrowRight') setLaneIndex((p) => Math.min(p + 1, 2))
 
       if (e.key === 'ArrowUp' && !isJumping.current && actions.jump) {
-        soundManager.play('jump')
         isJumping.current = true
 
         actions.run?.fadeOut(0.1)
