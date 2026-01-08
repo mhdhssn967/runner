@@ -89,9 +89,9 @@ useEffect(() => {
   
     // 🎵 Load all sounds once
     soundManager.load('coin', '/sounds/coin.ogg', 0.1)
-    soundManager.load('jump', '/sounds/jump.ogg', 0.2)
-    soundManager.load('death', '/sounds/death.ogg', 0.6)
-    soundManager.load('gameover', '/sounds/game_over.ogg', 0.6)
+    soundManager.load('jump', '/sounds/jump.ogg', 0.6)
+    soundManager.load('death', '/sounds/death.ogg', 0.9)
+    soundManager.load('gameover', '/sounds/game_over.ogg', 0.4)
 
     // 🎶 Background music (loop = true)
     soundManager.load('bg', '/sounds/bgm.ogg', 0.4, true)
