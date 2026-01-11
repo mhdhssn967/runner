@@ -3,47 +3,55 @@ import React, {
   useImperativeHandle,
   useRef,
   useEffect
-} from 'react';
-import Obstacle from './Obstacle';
+} from 'react'
+import Obstacle from './Obstacle'
 
 const SpawnManager = forwardRef(({ segmentLength, lanePositions }, ref) => {
-  const obstacleFrequency = 1;
-  const obstaclesPerSegment = 5;
-  const obstacleTypes = ['rock', 'trap', 'pole'];
+  const obstaclesPerSegment = 5
+  const obstacleTypes = ['rock', 'trap', 'pole']
 
-  const obstacleRefs = useRef([]);
-  const canSpawnRef = useRef(false);
+  const LANE_INSET = 0.8 // ✅ keeps obstacles away from edges
+
+  const obstacleRefs = useRef([])
+  const canSpawnRef = useRef(false)
 
   useEffect(() => {
     obstacleRefs.current.forEach((obs) => {
-      if (obs) obs.visible = false;
-    });
+      if (obs) obs.visible = false
+    })
 
     const timer = setTimeout(() => {
-      canSpawnRef.current = true;
-    }, 3000);
+      canSpawnRef.current = true
+    }, 3000)
 
-    return () => clearTimeout(timer);
-  }, []);
+    return () => clearTimeout(timer)
+  }, [])
 
   useImperativeHandle(ref, () => ({
     randomize: () => {
-      if (!canSpawnRef.current) return;
+      if (!canSpawnRef.current) return
 
       obstacleRefs.current.forEach((obs) => {
-        if (!obs) return;
+        if (!obs) return
 
-        obs.visible = true;
+        const baseLane =
+          lanePositions[Math.floor(Math.random() * lanePositions.length)]
+
+        obs.visible = true
         obs.position.x =
-          lanePositions[Math.floor(Math.random() * lanePositions.length)];
-        obs.position.z = -Math.random() * segmentLength;
-        obs.position.y = 0.2;
-      });
+          baseLane > 0
+            ? baseLane - LANE_INSET
+            : baseLane < 0
+            ? baseLane + LANE_INSET
+            : baseLane
+
+        obs.position.z = -Math.random() * segmentLength
+        obs.position.y = -0.1
+      })
     },
 
-    // 🔑 EXPOSE OBSTACLES
     getObstacles: () => obstacleRefs.current
-  }));
+  }))
 
   return (
     <>
@@ -52,12 +60,14 @@ const SpawnManager = forwardRef(({ segmentLength, lanePositions }, ref) => {
           key={i}
           ref={(el) => (obstacleRefs.current[i] = el)}
           type={
-            obstacleTypes[Math.floor(Math.random() * obstacleTypes.length)]
+            obstacleTypes[
+              Math.floor(Math.random() * obstacleTypes.length)
+            ]
           }
         />
       ))}
     </>
-  );
-});
+  )
+})
 
-export default SpawnManager;
+export default SpawnManager

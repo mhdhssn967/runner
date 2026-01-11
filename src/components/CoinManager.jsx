@@ -9,13 +9,14 @@ const CoinManager = forwardRef(({ segmentLength, lanePositions }, ref) => {
   const MAX_COINS_PER_LINE = 5
   const MIN_COINS_PER_LINE = 1
 
-  const MAX_LINES_PER_SEGMENT = 3   // max separate coin lines
-  const COIN_SPACING = 3            // 👈 frequency control (lower = denser)
-  const LINE_GAP = 10               // distance between different lines
+  const MAX_LINES_PER_SEGMENT = 3
+  const COIN_SPACING = 3
+  const LINE_GAP = 10
+
+  const LANE_INSET = 1 // ✅ keeps coins away from edges
 
   /* ======================================================= */
 
-  // Pre-create enough coins (max possible)
   const TOTAL_POOL_SIZE =
     MAX_COINS_PER_LINE * MAX_LINES_PER_SEGMENT
 
@@ -25,10 +26,8 @@ const CoinManager = forwardRef(({ segmentLength, lanePositions }, ref) => {
     getCoins: () => coinRefs.current,
 
     randomize: () => {
-      // Hide all coins first
       coinRefs.current.forEach((coin) => coin?.collect())
 
-      // Decide how many lines appear this segment (0–MAX)
       const linesThisSegment = Math.floor(
         Math.random() * (MAX_LINES_PER_SEGMENT + 1)
       )
@@ -43,10 +42,17 @@ const CoinManager = forwardRef(({ segmentLength, lanePositions }, ref) => {
               (MAX_COINS_PER_LINE - MIN_COINS_PER_LINE + 1)
           )
 
-        const lane =
+        const baseLane =
           lanePositions[
             Math.floor(Math.random() * lanePositions.length)
           ]
+
+        const lane =
+          baseLane > 0
+            ? baseLane - LANE_INSET
+            : baseLane < 0
+            ? baseLane + LANE_INSET
+            : baseLane
 
         const startZ =
           -Math.random() * (segmentLength - LINE_GAP)
@@ -72,7 +78,7 @@ const CoinManager = forwardRef(({ segmentLength, lanePositions }, ref) => {
         <Coin
           key={i}
           ref={(el) => (coinRefs.current[i] = el)}
-          position={[0, -100, 0]} // 👈 hidden on start
+          position={[0, -100, 0]}
         />
       ))}
     </group>

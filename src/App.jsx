@@ -10,7 +10,7 @@ const App = () => {
   
 useGLTF.preload('/banana.glb')
 useGLTF.preload('/coin.glb')
-useGLTF.preload('/platform.glb')
+// useGLTF.preload('/platform.glb')
 
   return (
     <div>

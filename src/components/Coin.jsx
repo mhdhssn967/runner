@@ -17,7 +17,6 @@ const Coin = forwardRef(({ position }, ref) => {
         // obj.castShadow = true
         obj.material = obj.material.clone()
         // obj.material.emissive = new THREE.Color(0xffcc00)
-        obj.material.emissiveIntensity = 0.6
       }
     })
   }, [clonedScene])

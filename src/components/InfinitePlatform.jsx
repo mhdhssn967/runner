@@ -4,43 +4,47 @@ import React, {
   useImperativeHandle
 } from 'react'
 import { useFrame } from '@react-three/fiber'
-import { useGLTF, Clone } from '@react-three/drei'
+import * as THREE from 'three'
 import SpawnManager from './SpawnManager'
 import CoinManager from './CoinManager'
 
 const InfinitePlatform = forwardRef(({ isPlaying }, ref) => {
-  const { scene } = useGLTF('/platform_new.glb')
-  
-
-  const segmentLength = 87.3
+  const segmentLength = 110.3
   const numSegments = 4
-  const lanePositions = [-1.7, 0, 1.7]
+
+  const laneWidth = 2.5
+  const lanePositions = [-laneWidth, 0, laneWidth]
+
+  const totalWidth = laneWidth * 3
   const totalLength = segmentLength * numSegments
   const resetThreshold = 160
 
+  // 🎮 Speed system
   const INITIAL_SPEED = 0.3
   const MAX_SPEED = 1.5
-  const ACCELERATION_RATE = 0.0001 // Adjust this to change how fast it gets harder
+  const ACCELERATION_RATE = 0.0001
   const currentSpeed = useRef(INITIAL_SPEED)
 
   const segmentRefs = useRef([])
   const spawnerRefs = useRef([])
   const coinManagerRefs = useRef([])
-  
+
+  // 🎨 Materials (created once)
+  const roadMaterial = new THREE.MeshStandardMaterial({ color: '#facc15' }) // yellow
+  const sideMaterial = new THREE.MeshStandardMaterial({ color: '#22c55e' }) // green
 
   useFrame((_, delta) => {
     if (!isPlaying) return
 
-    // 1. Increase the speed multiplier over time
     if (currentSpeed.current < MAX_SPEED) {
       currentSpeed.current += ACCELERATION_RATE * delta * 60
     }
 
-    // 2. Use the dynamic speed for movement
     const frameSpeed = currentSpeed.current * delta * 60
 
     segmentRefs.current.forEach((group, i) => {
       if (!group) return
+
       group.position.z += frameSpeed
 
       if (group.position.z > resetThreshold) {
@@ -53,6 +57,7 @@ const InfinitePlatform = forwardRef(({ isPlaying }, ref) => {
 
   useImperativeHandle(ref, () => ({
     getSpeed: () => currentSpeed.current,
+
     getAllObstacles: () =>
       spawnerRefs.current.flatMap(
         (s) => s?.getObstacles?.() || []
@@ -70,21 +75,51 @@ const InfinitePlatform = forwardRef(({ isPlaying }, ref) => {
         <group
           key={i}
           ref={(el) => (segmentRefs.current[i] = el)}
-          position={[0, 0, -i * segmentLength]}
+          position={[0, 0.3, -i * segmentLength]}
         >
-          {/* Platform */}
-          <group position={[0, 0.01, 0]}>
-            <Clone object={scene} deep receiveShadow />
-          </group>
+          {/* 🟨 Main road */}
+          <mesh
+            receiveShadow
+            position={[0, -0.1, -segmentLength/3]}
+            material={roadMaterial}
+          >
+            <boxGeometry args={[totalWidth, 0.2, segmentLength]} />
+          </mesh>
 
-          {/* Obstacles */}
+          {/* 🟩 Left side */}
+          <mesh
+            receiveShadow
+            position={[
+              -(totalWidth / 2) ,
+              0.25,
+              -segmentLength / 3
+            ]}
+            material={sideMaterial}
+          >
+            <boxGeometry args={[0.5, 0.5, segmentLength]} />
+          </mesh>
+
+          {/* 🟩 Right side */}
+          <mesh
+            receiveShadow
+            position={[
+              (totalWidth / 2) ,
+              0.25,
+              -segmentLength / 3
+            ]}
+            material={sideMaterial}
+          >
+            <boxGeometry args={[0.5, 0.5, segmentLength]} />
+          </mesh>
+
+          {/* 🚧 Obstacles */}
           <SpawnManager
             ref={(el) => (spawnerRefs.current[i] = el)}
             segmentLength={segmentLength}
             lanePositions={lanePositions}
           />
 
-          {/* Coins */}
+          {/* 🪙 Coins */}
           <CoinManager
             ref={(el) => (coinManagerRefs.current[i] = el)}
             segmentLength={segmentLength}
