@@ -1,11 +1,16 @@
 import React, { useState } from 'react'
 import Game from './components/Game'
-import GameControls from './components/GameControls'
 import './App.css'
+import { useGLTF } from '@react-three/drei'
 
 const App = () => {
   const [isPlaying, setIsPlaying] = useState(false)
   const [isDeadState, setIsDeadState] = useState(false)
+
+  
+useGLTF.preload('/banana.glb')
+useGLTF.preload('/coin.glb')
+useGLTF.preload('/platform.glb')
 
   return (
     <div>

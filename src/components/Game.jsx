@@ -1,7 +1,7 @@
 import { Canvas } from '@react-three/fiber'
 import { PerspectiveCamera } from '@react-three/drei'
 import { Suspense, useRef } from 'react'
-
+import { Perf } from 'r3f-perf'
 import InfinitePlatform from './InfinitePlatform'
 import Player from './Player'
 import HUD from './HUD'
@@ -12,18 +12,21 @@ import { Html } from '@react-three/drei'
 
 export default function Game({ isDeadState,isPlaying, setIsPlaying, setIsDeadState }) {
   const platformRef = useRef()
+  
 
   return (
     <>
+    
       <HUD />
 
       <Canvas
         shadows
         gl={{ antialias: false, powerPreference: 'high-performance' }}
-        dpr={[1, 2]}
+        dpr={[1, 1.5]}
         style={{ width: '100vw', height: '100vh' }}
       >
-        
+                <Perf position="top-left" />
+
         {/* ⏳ BLOCK RENDER UNTIL ASSETS LOAD */}
         <Suspense fallback={<LoadingScreen />}>
         {(!isPlaying && !isDeadState) && (
