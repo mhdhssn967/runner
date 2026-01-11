@@ -25,13 +25,19 @@ const InfinitePlatform = forwardRef(({ isPlaying }, ref) => {
   const ACCELERATION_RATE = 0.0001
   const currentSpeed = useRef(INITIAL_SPEED)
 
+  // 🧱 Visual tuning
+  const WALL_CHUNK_LENGTH = 12
+  const WALL_GAP = 6
+
+  const LANE_LINE_WIDTH = 0.08
+  const LANE_LINE_HEIGHT = 0.02
+
   const segmentRefs = useRef([])
   const spawnerRefs = useRef([])
   const coinManagerRefs = useRef([])
 
-  // 🎨 Materials (created once)
-  const roadMaterial = new THREE.MeshStandardMaterial({ color: '#facc15' }) // yellow
-  const sideMaterial = new THREE.MeshStandardMaterial({ color: '#22c55e' }) // green
+  const roadMaterial = new THREE.MeshStandardMaterial({ color: '#facc15' })
+  const sideMaterial = new THREE.MeshStandardMaterial({ color: '#22c55e' })
 
   useFrame((_, delta) => {
     if (!isPlaying) return
@@ -57,12 +63,10 @@ const InfinitePlatform = forwardRef(({ isPlaying }, ref) => {
 
   useImperativeHandle(ref, () => ({
     getSpeed: () => currentSpeed.current,
-
     getAllObstacles: () =>
       spawnerRefs.current.flatMap(
         (s) => s?.getObstacles?.() || []
       ),
-
     getAllCoins: () =>
       coinManagerRefs.current.flatMap(
         (c) => c?.getCoins?.() || []
@@ -77,40 +81,72 @@ const InfinitePlatform = forwardRef(({ isPlaying }, ref) => {
           ref={(el) => (segmentRefs.current[i] = el)}
           position={[0, 0.3, -i * segmentLength]}
         >
-          {/* 🟨 Main road */}
+          {/* 🟨 Road */}
           <mesh
             receiveShadow
-            position={[0, -0.1, -segmentLength/3]}
+            position={[0, -0.1, -segmentLength / 3]}
             material={roadMaterial}
           >
             <boxGeometry args={[totalWidth, 0.2, segmentLength]} />
           </mesh>
 
-          {/* 🟩 Left side */}
-          <mesh
-            receiveShadow
-            position={[
-              -(totalWidth / 2) ,
-              0.25,
-              -segmentLength / 3
-            ]}
-            material={sideMaterial}
-          >
-            <boxGeometry args={[0.5, 0.5, segmentLength]} />
-          </mesh>
+          {/* 🟦 Lane dividers */}
+          {[-laneWidth / 2, laneWidth / 2].map((x, idx) => (
+            <mesh
+              key={idx}
+              position={[x, -0.01, -segmentLength / 3]}
+              receiveShadow
+            >
+              <boxGeometry
+                args={[
+                  LANE_LINE_WIDTH,
+                  LANE_LINE_HEIGHT+0.1,
+                  segmentLength
+                ]}
+              />
+              <meshStandardMaterial color="#e5e7eb" />
+            </mesh>
+          ))}
 
-          {/* 🟩 Right side */}
-          <mesh
-            receiveShadow
-            position={[
-              (totalWidth / 2) ,
-              0.25,
-              -segmentLength / 3
-            ]}
-            material={sideMaterial}
-          >
-            <boxGeometry args={[0.5, 0.5, segmentLength]} />
-          </mesh>
+          {/* 🟩 Gapped left wall */}
+          {Array.from({
+            length: Math.floor(
+              segmentLength / (WALL_CHUNK_LENGTH + WALL_GAP)
+            )
+          }).map((_, j) => (
+            <mesh
+              key={`left-${j}`}
+              receiveShadow
+              material={sideMaterial}
+              position={[
+                -(totalWidth / 2),
+                0.25,
+                -j * (WALL_CHUNK_LENGTH + WALL_GAP)
+              ]}
+            >
+              <boxGeometry args={[0.5, 0.5, WALL_CHUNK_LENGTH]} />
+            </mesh>
+          ))}
+
+          {/* 🟩 Gapped right wall */}
+          {Array.from({
+            length: Math.floor(
+              segmentLength / (WALL_CHUNK_LENGTH + WALL_GAP)
+            )
+          }).map((_, j) => (
+            <mesh
+              key={`right-${j}`}
+              receiveShadow
+              material={sideMaterial}
+              position={[
+                totalWidth / 2,
+                0.25,
+                -j * (WALL_CHUNK_LENGTH + WALL_GAP)
+              ]}
+            >
+              <boxGeometry args={[0.5, 0.5, WALL_CHUNK_LENGTH]} />
+            </mesh>
+          ))}
 
           {/* 🚧 Obstacles */}
           <SpawnManager

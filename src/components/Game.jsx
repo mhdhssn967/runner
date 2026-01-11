@@ -25,7 +25,7 @@ export default function Game({ isDeadState,isPlaying, setIsPlaying, setIsDeadSta
         dpr={[1, 1.5]}
         style={{ width: '100vw', height: '100vh' }}
       >
-                <Perf position="top-left" />
+                {/* <Perf position="top-left" /> */}
 
         {/* ⏳ BLOCK RENDER UNTIL ASSETS LOAD */}
         <Suspense fallback={<LoadingScreen />}>
