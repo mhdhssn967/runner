@@ -7,8 +7,13 @@ import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import SpawnManager from './SpawnManager'
 import CoinManager from './CoinManager'
-
+import { RoundedBox } from '@react-three/drei'
 const InfinitePlatform = forwardRef(({ isPlaying }, ref) => {
+
+  
+
+
+
   const segmentLength = 110.3
   const numSegments = 4
 
@@ -38,6 +43,14 @@ const InfinitePlatform = forwardRef(({ isPlaying }, ref) => {
 
   const roadMaterial = new THREE.MeshStandardMaterial({ color: '#facc15' })
   const sideMaterial = new THREE.MeshStandardMaterial({ color: '#22c55e' })
+
+
+  // 🟨 Road bumps
+const BUMP_COUNT = 5
+const BUMP_WIDTH = totalWidth * 0.85
+const BUMP_HEIGHT = 0.3
+const BUMP_LENGTH = 0.5
+const BUMP_COLOR = '#eab308' // darker yellow
 
   useFrame((_, delta) => {
     if (!isPlaying) return
@@ -104,9 +117,32 @@ const InfinitePlatform = forwardRef(({ isPlaying }, ref) => {
                   segmentLength
                 ]}
               />
-              <meshStandardMaterial color="#e5e7eb" />
+              <meshStandardMaterial color="#998f03" />
             </mesh>
           ))}
+
+          {/* 🟡 Road bumps */}
+{Array.from({ length: BUMP_COUNT }).map((_, j) => (
+  <mesh
+    key={`bump-${j}`}
+    position={[
+      0,
+      -0.08,
+      -j * (segmentLength / BUMP_COUNT)
+    ]}
+    receiveShadow
+  >
+    <boxGeometry
+      args={[
+        BUMP_WIDTH,
+        BUMP_HEIGHT,
+        BUMP_LENGTH
+      ]}
+    />
+    <meshStandardMaterial color={BUMP_COLOR} />
+  </mesh>
+))}
+
 
           {/* 🟩 Gapped left wall */}
           {Array.from({
@@ -114,18 +150,19 @@ const InfinitePlatform = forwardRef(({ isPlaying }, ref) => {
               segmentLength / (WALL_CHUNK_LENGTH + WALL_GAP)
             )
           }).map((_, j) => (
-            <mesh
-              key={`left-${j}`}
-              receiveShadow
-              material={sideMaterial}
-              position={[
-                -(totalWidth / 2),
-                0.25,
-                -j * (WALL_CHUNK_LENGTH + WALL_GAP)
-              ]}
-            >
-              <boxGeometry args={[0.5, 0.5, WALL_CHUNK_LENGTH]} />
-            </mesh>
+            <RoundedBox
+  args={[0.6, 0.6, segmentLength]}
+  radius={0.15}     // 👈 roundness
+  smoothness={6}
+  position={[
+    -(totalWidth / 2),
+    0.25,
+    -segmentLength / 3
+  ]}
+>
+  <meshStandardMaterial color="#22c55e" />
+</RoundedBox>
+
           ))}
 
           {/* 🟩 Gapped right wall */}
@@ -134,18 +171,18 @@ const InfinitePlatform = forwardRef(({ isPlaying }, ref) => {
               segmentLength / (WALL_CHUNK_LENGTH + WALL_GAP)
             )
           }).map((_, j) => (
-            <mesh
-              key={`right-${j}`}
-              receiveShadow
-              material={sideMaterial}
-              position={[
-                totalWidth / 2,
-                0.25,
-                -j * (WALL_CHUNK_LENGTH + WALL_GAP)
-              ]}
-            >
-              <boxGeometry args={[0.5, 0.5, WALL_CHUNK_LENGTH]} />
-            </mesh>
+            <RoundedBox
+  args={[0.6, 0.6, segmentLength]}
+  radius={0.15}
+  smoothness={6}
+  position={[
+    totalWidth / 2,
+    0.25,
+    -segmentLength / 3
+  ]}
+>
+  <meshStandardMaterial color="#22c55e" />
+</RoundedBox>
           ))}
 
           {/* 🚧 Obstacles */}

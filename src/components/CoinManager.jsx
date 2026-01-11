@@ -6,12 +6,12 @@ const CoinManager = forwardRef(({ segmentLength, lanePositions }, ref) => {
 
   /* ================== TUNABLE VARIABLES ================== */
 
-  const MAX_COINS_PER_LINE = 5
-  const MIN_COINS_PER_LINE = 1
+  const MAX_COINS_PER_LINE = 10
+  const MIN_COINS_PER_LINE = 3
 
   const MAX_LINES_PER_SEGMENT = 3
   const COIN_SPACING = 3
-  const LINE_GAP = 10
+  const LINE_GAP = 5
 
   const LANE_INSET = 1 // ✅ keeps coins away from edges
 
@@ -78,7 +78,7 @@ const CoinManager = forwardRef(({ segmentLength, lanePositions }, ref) => {
         <Coin
           key={i}
           ref={(el) => (coinRefs.current[i] = el)}
-          position={[0, -100, 0]}
+          position={[0, -30, 0]}
         />
       ))}
     </group>

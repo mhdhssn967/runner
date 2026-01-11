@@ -10,7 +10,7 @@ const SpawnManager = forwardRef(({ segmentLength, lanePositions }, ref) => {
   const obstaclesPerSegment = 5
   const obstacleTypes = ['rock', 'trap', 'pole']
 
-  const LANE_INSET = 0.8 // ✅ keeps obstacles away from edges
+  const LANE_INSET = 0.6 // ✅ keeps obstacles away from edges
 
   const obstacleRefs = useRef([])
   const canSpawnRef = useRef(false)
