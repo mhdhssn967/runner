@@ -3,7 +3,7 @@
     background-size: contain;
     position: fixed;
     height: 100vh;
-    top: 30px;
+    top: 5px;
     z-index: -1;
     width: 100vw;
 }
