@@ -10,14 +10,15 @@ import GameControls from './GameControls'
 
 import { Html } from '@react-three/drei'
 
-export default function Game({ isDeadState,isPlaying, setIsPlaying, setIsDeadState }) {
+export default function Game({ isDeadState,isPlaying, setIsPlaying, setIsDeadState, companyId,branchId  }) {
   const platformRef = useRef()
   
 
   return (
     <>
     
-      <HUD />
+      <HUD companyId={companyId}
+        branchId={branchId}/>
 
       <Canvas
         shadows
