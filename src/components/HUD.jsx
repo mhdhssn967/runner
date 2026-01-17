@@ -7,7 +7,7 @@ const HUD = ({companyId,branchId, playerName}) => {
 
     useEffect(()=>{
         const fetchHighScore=async()=>{
-           const score = await fetchPlayerScore()
+           const score = await fetchPlayerScore(companyId)
             setHighScore(score)
         };fetchHighScore()
     },[])

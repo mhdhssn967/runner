@@ -1,11 +1,11 @@
 import { doc, getDoc, updateDoc, setDoc } from 'firebase/firestore'
 import { auth, db } from '../../firebaseConfig'
 
-export async function updatePlayerScore(newScore) {
+export async function updatePlayerScore(newScore,companyId) {
   const user = auth.currentUser
   if (!user) return
 
-  const userRef = doc(db, 'users', user.uid)
+  const userRef = doc(db,'companies',companyId, 'users', user.uid)
   const snap = await getDoc(userRef)
 
   // If user doc does not exist at all
@@ -29,11 +29,11 @@ export async function updatePlayerScore(newScore) {
 }
 
 
-export async function fetchPlayerScore() {
+export async function fetchPlayerScore(companyId) {
   const user = auth.currentUser
   if (!user) return null
 
-  const userRef = doc(db, 'users', user.uid)
+  const userRef = doc(db,'companies',companyId, 'users', user.uid)
   const snap = await getDoc(userRef)
 
   if (!snap.exists()) return null

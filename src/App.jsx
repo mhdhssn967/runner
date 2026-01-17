@@ -23,7 +23,7 @@ const App = () => {
   const [loading, setLoading] = useState(true)
 
   // Preload models
-  useGLTF.preload('/banana.glb')
+  useGLTF.preload('/banananew.glb')
   useGLTF.preload('/coin.glb')
 
   // Read QR params
@@ -35,50 +35,60 @@ const App = () => {
 
   // Auth + username check
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (!firebaseUser) {
-        await signInAnonymously(auth)
-        return
-      }
+  // ⛔ Do nothing until we know companyId state
+  if (companyId === undefined) return
 
-      setUser(firebaseUser)
+  const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+    if (!firebaseUser) {
+      await signInAnonymously(auth)
+      return
+    }
 
-      const userRef = doc(db, 'users', firebaseUser.uid)
-      const snap = await getDoc(userRef)
+    setUser(firebaseUser)
 
-      if (snap.exists() && snap.data()?.player?.username) {
-        setPlayerName(snap.data().player.username)
-        setCanRenderGame(true)
-      } else {
-        setShowNameModal(true)
-      }
+    // 🔀 Decide Firestore path
+    const userRef = companyId
+      ? doc(db, 'companies', companyId, 'users', firebaseUser.uid)
+      : doc(db, 'users', firebaseUser.uid) // fallback
 
-      setLoading(false)
-    })
+    const snap = await getDoc(userRef)
 
-    return () => unsubscribe()
-  }, [])
+    if (snap.exists() && snap.data()?.player?.username) {
+      setPlayerName(snap.data().player.username)
+      setCanRenderGame(true)
+    } else {
+      setShowNameModal(true)
+    }
+
+    setLoading(false)
+  })
+
+  return () => unsubscribe()
+}, [companyId])
 
   // Save name
   const handleSaveName = async (name) => {
-    if (!user) return
+  if (!user) return
 
-    const userRef = doc(db, 'users', user.uid)
+  const userRef = companyId
+    ? doc(db, 'companies', companyId, 'users', user.uid)
+    : doc(db, 'users', user.uid)
 
-    await setDoc(
-      userRef,
-      {
-        player: {
-          username: name,
-        },
+  await setDoc(
+    userRef,
+    {
+      player: {
+        username: name,
       },
-      { merge: true }
-    )
+    },
+    { merge: true }
+  )
 
-    setPlayerName(name)
-    setShowNameModal(false)
-    setCanRenderGame(true)
-  }
+  setPlayerName(name)
+  setShowNameModal(false)
+  setCanRenderGame(true)
+}
+
 
   if (loading) return null
 

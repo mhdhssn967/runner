@@ -14,7 +14,7 @@ export default function Player({
   coinRefs,
   setIsPlaying,
   platformRef,
-  setIsDeadState,
+  setIsDeadState,companyId
 }) {
   const lanePositions = [-1.7, 0, 1.7]
   const [laneIndex, setLaneIndex] = useState(1)
@@ -33,7 +33,7 @@ export default function Player({
   const playerBox = useRef(new THREE.Box3())
 
   // Load GLTF
-  const { scene, animations } = useGLTF('/banana.glb')
+  const { scene, animations } = useGLTF('/banananew.glb')
   const { actions } = useAnimations(animations, groupRef)
 
 
@@ -76,7 +76,7 @@ useEffect(() => {
     } else {
       // Normal pause or start screen: Play idle
       Object.values(actions).forEach((a) => a?.stop())
-      actions.idle?.reset().fadeIn(0.3).play()
+      actions.idle2?.reset().fadeIn(0.3).play()
     }
   }
 }, [actions, isPlaying])
@@ -295,7 +295,7 @@ const handleDeath = async() => {
   // 🎬 Play fall animation
   if (actions.fall) {
     actions.run?.stop()
-    actions.idle?.stop()
+    actions.idle2?.stop()
     actions.jump?.stop()
 
     actions.fall
@@ -305,8 +305,9 @@ const handleDeath = async() => {
 
     actions.fall.clampWhenFinished = true
   }
-
-  await updatePlayerScore(score)
+if(companyId){
+  await updatePlayerScore(score,companyId)
+}
   // ⏳ 2. Wait for death sound to finish, THEN play game over music
  
 

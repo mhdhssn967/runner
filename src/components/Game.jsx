@@ -76,6 +76,7 @@ export default function Game({playerName, isDeadState,isPlaying, setIsPlaying, s
             platformRef={platformRef}
             setIsPlaying={setIsPlaying}
             setIsDeadState={setIsDeadState}
+            companyId={companyId}
           />
         </Suspense>
       </Canvas>
