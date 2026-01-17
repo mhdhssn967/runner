@@ -6,7 +6,7 @@ import {
   updateDoc,
   serverTimestamp
 } from "firebase/firestore"
-import { auth, db } from "../firebaseConfig"
+import { auth, db } from "../../firebaseConfig"
 
 export async function updatePlayerScore(newScore, companyId) {
   const user = auth.currentUser
