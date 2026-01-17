@@ -6,7 +6,7 @@ import React, {
 import { useGLTF, Clone } from '@react-three/drei';
 import * as THREE from 'three';
 
-const HITBOX_MARGIN = 0.5; // 🔧 Tweak this (0.2–0.4 ideal)
+const HITBOX_MARGIN = 0.4; // 🔧 Tweak this (0.2–0.4 ideal)
 
 const Obstacle = forwardRef(({ type }, ref) => {
   const rock = useGLTF('/rock.glb');
@@ -32,8 +32,8 @@ const Obstacle = forwardRef(({ type }, ref) => {
       boundingBox.current.min.x += HITBOX_MARGIN;
       boundingBox.current.max.x -= HITBOX_MARGIN;
 
-      boundingBox.current.min.y += HITBOX_MARGIN;
-      boundingBox.current.max.y -= HITBOX_MARGIN;
+      boundingBox.current.min.y += HITBOX_MARGIN+0.4;
+      boundingBox.current.max.y -= HITBOX_MARGIN-0.4;
 
       boundingBox.current.min.z += HITBOX_MARGIN;
       boundingBox.current.max.z -= HITBOX_MARGIN;

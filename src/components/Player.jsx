@@ -6,6 +6,7 @@ import { useGLTF, useAnimations } from '@react-three/drei'
 import * as THREE from 'three'
 import './Player.css'
 import { soundManager } from '../audio/SoundManager'
+import { updatePlayerScore } from '../services/services'
 
 export default function Player({
   isPlaying,
@@ -249,7 +250,11 @@ soundManager.play('jump')
         if (!obs || obs.visible === false) continue;
 
         const obsBox = obs.getBoundingBox?.();
+        
+
+        
         if (obsBox && playerBox.current.intersectsBox(obsBox)) {
+          
           handleDeath();
           break;
         }
@@ -275,7 +280,7 @@ if (coinRefs && !isJumping.current) { // Added !isJumping.current here
 
   })
 
-const handleDeath = () => {
+const handleDeath = async() => {
   if (isDead.current) return
   isDead.current = true
 
@@ -301,6 +306,7 @@ const handleDeath = () => {
     actions.fall.clampWhenFinished = true
   }
 
+  await updatePlayerScore(score)
   // ⏳ 2. Wait for death sound to finish, THEN play game over music
  
 
@@ -325,7 +331,7 @@ const handleDeath = () => {
       }}
     >
       {/* Persistent Score */}
-      <div style={{ position: 'absolute', top: '1px', fontSize: '30px', fontWeight: 'bold', color: 'green',right:'50px' }}>
+      <div style={{ position: 'absolute', top: '1px', fontSize: '25px', fontWeight: 'bold', color: 'green',right:'20px' }}>
         Score: {score}
       </div>
 

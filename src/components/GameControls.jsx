@@ -106,7 +106,7 @@ useEffect(() => {
   return (
     <div style={wrapperStyle}>
       {/* PLAY BUTTON */}
-      <button class="play-button" onClick={startPlay}>
+      <button className="play-button" onClick={startPlay}>
   PLAY
 </button>
       {/* <div
