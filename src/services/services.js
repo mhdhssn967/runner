@@ -1,32 +1,42 @@
-import { doc, getDoc, updateDoc, setDoc } from 'firebase/firestore'
-import { auth, db } from '../../firebaseConfig'
 
-export async function updatePlayerScore(newScore,companyId) {
+import {
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+  serverTimestamp
+} from "firebase/firestore"
+import { auth, db } from "../firebaseConfig"
+
+export async function updatePlayerScore(newScore, companyId) {
   const user = auth.currentUser
-  if (!user) return
+  if (!user || !companyId) return
 
-  const userRef = doc(db,'companies',companyId, 'users', user.uid)
+  const userRef = doc(db, "companies", companyId, "users", user.uid)
   const snap = await getDoc(userRef)
 
-  // If user doc does not exist at all
+  // If user doc does not exist
   if (!snap.exists()) {
     await setDoc(userRef, {
       player: {
         score: newScore,
-      },
+        lastPlayedAt: serverTimestamp()
+      }
     })
     return
   }
 
   const currentScore = snap.data()?.player?.score
 
-  // If score doesn't exist OR new score is higher
+  // Update only if score doesn't exist OR new score is higher
   if (currentScore === undefined || newScore > currentScore) {
     await updateDoc(userRef, {
-      'player.score': newScore,
+      "player.score": newScore,
+      "player.lastPlayedAt": serverTimestamp()
     })
   }
 }
+
 
 
 export async function fetchPlayerScore(companyId) {
