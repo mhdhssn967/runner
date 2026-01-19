@@ -7,73 +7,65 @@ import {
 } from "firebase/firestore"
 import { auth, db } from "../../firebaseConfig"
 
+
 export async function updatePlayerScore(newScore, companyId) {
   const user = auth.currentUser
   if (!user || !companyId) return
 
-  const userRef = doc(db, "companies", companyId, "users", user.uid)
-  const snap = await getDoc(userRef)
-
   const today = new Date().toISOString().split("T")[0] // YYYY-MM-DD
 
-  // 🆕 If no document exists
+  const playRef = doc(
+    db,
+    "companies",
+    companyId,
+    "users",
+    user.uid,
+    "plays",
+    today
+  )
+
+  const snap = await getDoc(playRef)
+
+  // 🆕 First play today
   if (!snap.exists()) {
-    await setDoc(userRef, {
-      player: {
-        score: newScore,
-        scoreDate: today,
-        lastPlayedAt: serverTimestamp()
-      }
+    await setDoc(playRef, {
+      score: newScore,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
     })
     return
   }
 
-  const player = snap.data().player || {}
-  const lastScoreDate = player.scoreDate
-  const currentScore = player.score
+  const currentScore = snap.data()?.score
 
-  // 🆕 New day → always allow score
-  if (lastScoreDate !== today) {
-    await updateDoc(userRef, {
-      "player.score": newScore,
-      "player.scoreDate": today,
-      "player.lastPlayedAt": serverTimestamp()
-    })
-    return
-  }
-
-  // 🟡 Same day → only update if higher
+  // 🔁 Same day → only update if higher
   if (currentScore === undefined || newScore > currentScore) {
-    await updateDoc(userRef, {
-      "player.score": newScore,
-      "player.lastPlayedAt": serverTimestamp()
+    await updateDoc(playRef, {
+      score: newScore,
+      updatedAt: serverTimestamp()
     })
   }
 }
-
-
-
 
 
 export async function fetchPlayerScore(companyId) {
   const user = auth.currentUser
   if (!user || !companyId) return null
 
-  const userRef = doc(db, "companies", companyId, "users", user.uid)
-  const snap = await getDoc(userRef)
-
-  if (!snap.exists()) return null
-
-  const player = snap.data().player
-  if (!player) return null
-
   const today = new Date().toISOString().split("T")[0]
 
-  // ❗ Only return score if it belongs to today
-  if (player.scoreDate === today) {
-    return player.score ?? null
-  }
+  const playRef = doc(
+    db,
+    "companies",
+    companyId,
+    "users",
+    user.uid,
+    "plays",
+    today
+  )
 
-  return null
+  const snap = await getDoc(playRef)
+  if (!snap.exists()) return null
+
+  return snap.data()?.score ?? null
 }
-
