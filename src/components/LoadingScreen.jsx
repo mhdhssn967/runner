@@ -6,7 +6,7 @@ export default function LoadingScreen() {
   return (
     <Html fullscreen>
       <div className="loading-screen">
-        <img src="/splash_log.png" alt="Logo" className="loading-logo" />
+        <img src="/splash2.png" alt="Logo" className="loading-logo" />
 
         <div className="spinner" />
 

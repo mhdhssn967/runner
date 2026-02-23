@@ -402,9 +402,9 @@ if(companyId){
               cursor: 'pointer',
               borderRadius: '10px',
               border: 'none',
-              background: '#ffe100',
+              background: '#ff7b00',
               color: 'black',
-              fontWeight: 'bold'
+              fontWeight: 'bold',color:'white'
             }}
           >
             TRY AGAIN

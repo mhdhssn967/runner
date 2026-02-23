@@ -22,7 +22,7 @@ const InfinitePlatform = forwardRef(({ isPlaying }, ref) => {
   const resetThreshold = 160
 
   // 🎮 Speed system
-  const INITIAL_SPEED = 1
+  const INITIAL_SPEED = 0.5
   const MAX_SPEED = 1.5
   const ACCELERATION_RATE = 0.0001
   const currentSpeed = useRef(INITIAL_SPEED)
