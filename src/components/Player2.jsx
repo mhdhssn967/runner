@@ -2,7 +2,7 @@ import { Html } from '@react-three/drei'
 
 import { useState, useEffect, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
-import { useGLTF, useAnimations } from '@react-three/drei'
+import { useFBX } from '@react-three/drei'
 import * as THREE from 'three'
 import './Player.css'
 import { soundManager } from '../audio/SoundManager'
@@ -32,15 +32,62 @@ export default function Player({
   // Stable Bounding Box
   const playerBox = useRef(new THREE.Box3())
 
-  // Load GLTF
-  const { scene, animations } = useGLTF('/banananew.glb')
-  const { actions } = useAnimations(animations, groupRef)
-console.log(actions);
+  // Load FBX models
+  const runFBX = useFBX('/new/run.fbx')
+  const fallFBX = useFBX('/new/fall.fbx')
+  const jumpFBX = useFBX('/new/jump.fbx')
+  const idleFBX = useFBX('/new/idle.fbx')
 
+  // Animation mixer
+  const mixerRef = useRef()
+  const actionsRef = useRef({})
+  const actions = actionsRef.current
+
+  // Setup mixer and animations
+  useEffect(() => {
+    if (!groupRef.current || !runFBX) return
+
+    const mixer = new THREE.AnimationMixer(groupRef.current)
+    mixerRef.current = mixer
+
+    // Helper to extract armature animation clip and retarget to run mesh
+    const getClip = (fbx, name) => {
+      if (fbx.animations && fbx.animations.length > 0) {
+        const clip = fbx.animations[0].clone()
+        clip.name = name
+        return clip
+      }
+      return null
+    }
+
+    const runClip = getClip(runFBX, 'run')
+    const fallClip = getClip(fallFBX, 'fall')
+    const jumpClip = getClip(jumpFBX, 'jump')
+    const idleClip = getClip(idleFBX, 'idle2')
+
+    if (runClip) actionsRef.current.run = mixer.clipAction(runClip)
+    if (fallClip) actionsRef.current.fall = mixer.clipAction(fallClip)
+    if (jumpClip) actionsRef.current.jump = mixer.clipAction(jumpClip)
+    if (idleClip) actionsRef.current.idle2 = mixer.clipAction(idleClip)
+
+    // Start idle by default
+    if (actionsRef.current.idle2) {
+      actionsRef.current.idle2.reset().fadeIn(0.3).play()
+    }
+
+    return () => {
+      mixer.stopAllAction()
+    }
+  }, [runFBX, fallFBX, jumpFBX, idleFBX])
+
+  // Tick the mixer
+  useFrame((_, delta) => {
+    mixerRef.current?.update(delta)
+  })
 
   // --- PREVENT SHARED MATERIAL BUGS ---
   useEffect(() => {
-    scene.traverse((obj) => {
+    runFBX.traverse((obj) => {
       if (obj.isMesh) {
         obj.castShadow = true
         if (obj.material) {
@@ -48,12 +95,12 @@ console.log(actions);
         }
       }
     })
-  }, [scene])
+  }, [runFBX])
 
   // --- ANIMATION CONTROLS ---
-  // --- REPLACE BOTH PREVIOUS ANIMATION useEffects WITH THIS ---
 useEffect(() => {
-  if (!actions) return
+  const actions = actionsRef.current
+  if (!actions || Object.keys(actions).length === 0) return
 
   if (isPlaying) {
     // 🏃 GAME START: Reset everything
@@ -70,9 +117,6 @@ useEffect(() => {
   } else {
     // 🛑 GAME STOPPED: Logic for Idle vs Death
     if (isDead.current) {
-      // If we are dead, DO NOT play idle. 
-      // The handleDeath function is already handling the "fall" animation.
-      // We stop the run animation so it doesn't loop.
       actions.run?.fadeOut(0.2)
     } else {
       // Normal pause or start screen: Play idle
@@ -80,7 +124,7 @@ useEffect(() => {
       actions.idle2?.reset().fadeIn(0.3).play()
     }
   }
-}, [actions, isPlaying])
+}, [actionsRef.current.run, actionsRef.current.idle2, isPlaying])
 
 
 
@@ -121,6 +165,7 @@ useEffect(() => {
       if (Math.abs(dy) > minSwipeDistance) {
         if (dy < 0) {
           // Swipe Up (Negative Y is up on screen)
+          const actions = actionsRef.current
           if (!isJumping.current && actions.jump) {
             soundManager.play('jump')
             triggerJump()
@@ -137,10 +182,10 @@ useEffect(() => {
     window.removeEventListener('touchstart', handleTouchStart)
     window.removeEventListener('touchend', handleTouchEnd)
   }
-}, [actions, isPlaying])
+}, [isPlaying])
 
 const triggerJump = () => {
-  
+  const actions = actionsRef.current
   if (isJumping.current || !actions.jump) return
   
   isJumping.current = true
@@ -161,6 +206,7 @@ soundManager.play('jump')
       if (e.key === 'ArrowLeft') setLaneIndex((p) => Math.max(p - 1, 0))
       if (e.key === 'ArrowRight') setLaneIndex((p) => Math.min(p + 1, 2))
 
+      const actions = actionsRef.current
       if (e.key === 'ArrowUp' && !isJumping.current && actions.jump) {
         isJumping.current = true
 
@@ -176,7 +222,7 @@ soundManager.play('jump')
 
     window.addEventListener('keydown', handleKey)
     return () => window.removeEventListener('keydown', handleKey)
-  }, [actions, isPlaying])
+  }, [isPlaying])
 
   useEffect(() => {
     targetX.current = lanePositions[laneIndex]
@@ -186,6 +232,7 @@ soundManager.play('jump')
   useFrame(() => {
     if (!groupRef.current || isDead.current) return
 
+    const actions = actionsRef.current
     const currentPlatformSpeed = platformRef.current?.getSpeed() || 0.3
 
     if (actions.run) {
@@ -204,8 +251,6 @@ soundManager.play('jump')
     const xDiff = targetX.current - groupRef.current.position.x
   
   // Tilt the Z-axis (sideways lean)
-  // When xDiff is positive (moving right), tilt left (negative Z)
-  // When xDiff is negative (moving left), tilt right (positive Z)
   const leanAmount = xDiff * 0.5 
   groupRef.current.rotation.z = THREE.MathUtils.lerp(
     groupRef.current.rotation.z,
@@ -215,7 +260,6 @@ soundManager.play('jump')
 
   // Optional: Slight Y-axis turn (looking towards the lane)
   const turnAmount = xDiff * 0.8
-  // Add Math.PI if the model is originally facing backwards
   const baseRotationY = isPlaying ? Math.PI : 0 
   groupRef.current.rotation.y = THREE.MathUtils.lerp(
     groupRef.current.rotation.y,
@@ -264,8 +308,7 @@ soundManager.play('jump')
   
 
     // 🟡 Coin collision (SAFE)
-    // Coin collision
-if (coinRefs && !isJumping.current) { // Added !isJumping.current here
+if (coinRefs && !isJumping.current) {
   for (const coin of coinRefs) {
     if (!coin || !coin.isActive()) continue
 
@@ -284,6 +327,8 @@ if (coinRefs && !isJumping.current) { // Added !isJumping.current here
 const handleDeath = async() => {
   if (isDead.current) return
   isDead.current = true
+
+  const actions = actionsRef.current
 
   // 🔊 1. Play DEATH SFX first
   soundManager.stop('bg') 
@@ -309,9 +354,6 @@ const handleDeath = async() => {
 if(companyId){
   await updatePlayerScore(score,companyId)
 }
-  // ⏳ 2. Wait for death sound to finish, THEN play game over music
- 
-
   setTimeout(() => {
     setGameOver(true)
     soundManager.play('gameover')
@@ -334,7 +376,7 @@ if(companyId){
       }}
     >
       {/* Persistent Score */}
-      <div style={{ position: 'absolute', top: '1px', fontSize: '25px', fontWeight: 'bold', color: 'green',right:'20px' }}>
+      <div style={{ position: 'absolute', top: '1px', fontSize: '25px', fontWeight: 'bold', color: 'white',right:'20px' }}>
         Score: {score}
       </div>
 
@@ -371,8 +413,8 @@ if(companyId){
       )}
     </Html>
 
-    <group ref={groupRef} position={[lanePositions[1], 0.3, 6]} rotation={[0, Math.PI , 0]} scale={[0.4, 0.4, 0.4]}>
-      <primitive object={scene} />
+    <group ref={groupRef} position={[lanePositions[1], 0.3, 6]} rotation={[0, Math.PI , 0]} scale={[0.006, 0.006, 0.006]}>
+      <primitive object={runFBX} />
     </group>
   </>
 )

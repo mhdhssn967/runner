@@ -16,7 +16,7 @@ const HUD = ({companyId,branchId, playerName}) => {
   return (
     <div className='hud'>
        
-        <img src="./logo.png" width={'70px'} alt="" />
+        <img src="./myg.jpg" width={'70px'} alt="" />
          <div>
             <p>{playerName}</p>
             {highScore&&<p className='hc'>High Score :{highScore}</p>}

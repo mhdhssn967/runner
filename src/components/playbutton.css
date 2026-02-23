@@ -9,7 +9,7 @@
   position: relative;
   
   /* Your Specific Yellow Theme */
-  background-color: #f0cd06; 
+  background-color: #f06f06; 
   color: white;
   letter-spacing: 2px;
   
@@ -20,8 +20,8 @@
 
   /* 3D Depth using shades of #fef301 */
   box-shadow: 
-    0 8px 0px #c9ab00,       /* Darker, "mustard" base edge */
-    inset 0 -8px 0px #e6bc00, /* Inner bottom shadow */
+    0 8px 0px #ec6f27,       /* Darker, "mustard" base edge */
+    inset 0 -8px 0px #e66800, /* Inner bottom shadow */
     inset 0 8px 15px rgba(255, 255, 255, 0.7); /* Bright top gloss */
 
   /* The white highlight spot */

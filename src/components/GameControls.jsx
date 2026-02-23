@@ -6,6 +6,7 @@ import './playbutton.css'
 const GameControls = ({ isPlaying, setIsPlaying }) => {
 
     const wrapperStyle = {
+      bottom:'-400px',
   position: 'fixed',
   left: '50%',
   transform: 'translate(-50%, -50%)',
@@ -14,7 +15,7 @@ const GameControls = ({ isPlaying, setIsPlaying }) => {
   flexDirection: 'column',
   alignItems: 'center',
   gap: '18px',
-  marginBottom:'110px'
+  marginBottom:'110px',zIndex:'200'
 }
 
 const buttonStyle = {
@@ -22,7 +23,7 @@ const buttonStyle = {
   width: '120px',
   height: '120px',
   borderRadius: '50%',
-  background: 'radial-gradient(circle at top left, #fff2a8, #f4b400)',
+  background: 'radial-gradient(circle at top left, #ffcfa8, #f4b400)',
   border: '4px solid #ffef9a',
   boxShadow: `
     inset 0 6px 10px rgba(255,255,255,0.6),
@@ -105,6 +106,17 @@ useEffect(() => {
 
   return (
     <div style={wrapperStyle}>
+      <div style={hintWrapper}>
+        <div style={hintItem}>
+          <ArrowLeft size={28} /> Swipe Left move left
+        </div>
+        <div style={hintItem}>
+          <ArrowRight size={28} /> Swipe Right move right
+        </div>
+        <div style={hintItem}>
+          <ArrowUp size={28} /> Swipe Up jump
+        </div>
+      </div>
       {/* PLAY BUTTON */}
       <button className="play-button" onClick={startPlay}>
   PLAY
@@ -130,17 +142,7 @@ useEffect(() => {
       </div> */}
 
       {/* CONTROLS HELP */}
-      <div style={hintWrapper}>
-        <div style={hintItem}>
-          <ArrowLeft size={28} /> Swipe Left move left
-        </div>
-        <div style={hintItem}>
-          <ArrowRight size={28} /> Swipe Right move right
-        </div>
-        <div style={hintItem}>
-          <ArrowUp size={28} /> Swipe Up jump
-        </div>
-      </div>
+      
     </div>
   )
 }

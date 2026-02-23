@@ -1,5 +1,5 @@
 .bg{
-    background-image: url(/bg.jpeg);
+    background-image: url(/bg4.png);
     background-size: contain;
     position: fixed;
     height: 100vh;
@@ -52,7 +52,7 @@
 }
 
 .hud{
-  background-color: #fef301;
+  background-color: #f16623;
   display: flex;
   gap: 75px;
   position: fixed;

@@ -10,9 +10,6 @@ import CoinManager from './CoinManager'
 import { RoundedBox } from '@react-three/drei'
 const InfinitePlatform = forwardRef(({ isPlaying }, ref) => {
 
-  
-
-
 
   const segmentLength = 110.3
   const numSegments = 4
@@ -25,7 +22,7 @@ const InfinitePlatform = forwardRef(({ isPlaying }, ref) => {
   const resetThreshold = 160
 
   // 🎮 Speed system
-  const INITIAL_SPEED = 0.3
+  const INITIAL_SPEED = 1
   const MAX_SPEED = 1.5
   const ACCELERATION_RATE = 0.0001
   const currentSpeed = useRef(INITIAL_SPEED)
@@ -41,8 +38,8 @@ const InfinitePlatform = forwardRef(({ isPlaying }, ref) => {
   const spawnerRefs = useRef([])
   const coinManagerRefs = useRef([])
 
-  const roadMaterial = new THREE.MeshStandardMaterial({ color: '#facc15' })
-  const sideMaterial = new THREE.MeshStandardMaterial({ color: '#22c55e' })
+  const roadMaterial = new THREE.MeshStandardMaterial({ color: '#dadada' })
+  const sideMaterial = new THREE.MeshStandardMaterial({ color: '#ff590c' })
 
 
   // 🟨 Road bumps
@@ -50,7 +47,7 @@ const BUMP_COUNT = 5
 const BUMP_WIDTH = totalWidth * 0.85
 const BUMP_HEIGHT = 0.3
 const BUMP_LENGTH = 0.5
-const BUMP_COLOR = '#eab308' // darker yellow
+const BUMP_COLOR = '#ff590c' // darker yellow
 
   useFrame((_, delta) => {
     if (!isPlaying) return
@@ -117,7 +114,7 @@ const BUMP_COLOR = '#eab308' // darker yellow
                   segmentLength
                 ]}
               />
-              <meshStandardMaterial color="#998f03" />
+              <meshStandardMaterial color="#ffffff" />
             </mesh>
           ))}
 
@@ -160,7 +157,7 @@ const BUMP_COLOR = '#eab308' // darker yellow
     -segmentLength / 3
   ]}
 >
-  <meshStandardMaterial color="#22c55e" />
+  <meshStandardMaterial color="#ff590c" />
 </RoundedBox>
 
           ))}
@@ -181,7 +178,7 @@ const BUMP_COLOR = '#eab308' // darker yellow
     -segmentLength / 3
   ]}
 >
-  <meshStandardMaterial color="#22c55e" />
+  <meshStandardMaterial color="#ff590c" />
 </RoundedBox>
           ))}
 

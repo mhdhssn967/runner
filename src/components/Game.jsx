@@ -9,6 +9,7 @@ import LoadingScreen from './LoadingScreen'
 import GameControls from './GameControls'
 
 import { Html } from '@react-three/drei'
+import Player2 from './Player2'
 
 export default function Game({playerName, isDeadState,isPlaying, setIsPlaying, setIsDeadState, companyId,branchId  }) {
   const platformRef = useRef()
@@ -69,7 +70,7 @@ export default function Game({playerName, isDeadState,isPlaying, setIsPlaying, s
             isPlaying={isPlaying}
           />
 
-          <Player
+          <Player2
             isPlaying={isPlaying}
             obstacleRefs={platformRef.current?.getAllObstacles()}
             coinRefs={platformRef.current?.getAllCoins()}
