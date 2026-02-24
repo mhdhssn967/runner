@@ -14,7 +14,7 @@ export default function Player({
   coinRefs,
   setIsPlaying,
   platformRef,
-  setIsDeadState,companyId
+  setIsDeadState,companyId,
 }) {
   const lanePositions = [-1.7, 0, 1.7]
   const [laneIndex, setLaneIndex] = useState(1)
