@@ -14,7 +14,7 @@ export default function Player({
   coinRefs,
   setIsPlaying,
   platformRef,
-  setIsDeadState,companyId,
+  setIsDeadState,companyId,setGestureControls
 }) {
   const lanePositions = [-1.7, 0, 1.7]
   const [laneIndex, setLaneIndex] = useState(1)
@@ -187,15 +187,31 @@ useEffect(() => {
 const triggerJump = () => {
   const actions = actionsRef.current
   if (isJumping.current || !actions.jump) return
-  
-  isJumping.current = true
-  actions.run?.fadeOut(0.1)
-  actions.jump.reset().setLoop(THREE.LoopOnce).play()
 
-  setTimeout(() => {
-    isJumping.current = false
-    if (isPlaying) actions.run?.reset().fadeIn(0.2).play()
-  }, 800)
+  isJumping.current = true
+
+  actions.run?.fadeOut(0.1)
+
+  const jumpAction = actions.jump
+  jumpAction.reset()
+  jumpAction.setLoop(THREE.LoopOnce, 1)
+  jumpAction.clampWhenFinished = true
+  jumpAction.play()
+
+  const mixer = mixerRef.current
+
+  const onFinished = (e) => {
+    if (e.action === jumpAction) {
+      mixer.removeEventListener('finished', onFinished)
+      isJumping.current = false
+
+      if (isPlaying) {
+        actions.run?.reset().fadeIn(0.2).play()
+      }
+    }
+  }
+
+  mixer.addEventListener('finished', onFinished)
 }
 
   // --- INPUT CONTROLS ---
@@ -272,7 +288,7 @@ soundManager.play('jump')
       
       const progress =
         actions.jump.time / actions.jump.getClip().duration
-      const jumpHeight = 1.8
+      const jumpHeight = 1
       groupRef.current.position.y =
         0.3 + Math.sin(progress * Math.PI) * jumpHeight
     } else {
@@ -359,7 +375,15 @@ if(companyId){
     soundManager.play('gameover')
   }, 100)
 }
+useEffect(() => {
+  if (!setGestureControls) return
 
+  setGestureControls({
+    moveLeft: () => setLaneIndex((p) => Math.max(p - 1, 0)),
+    moveRight: () => setLaneIndex((p) => Math.min(p + 1, 2)),
+    jump: triggerJump
+  })
+}, [])
  return (
   <>
     <Html

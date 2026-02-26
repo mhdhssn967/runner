@@ -10,10 +10,21 @@ import GameControls from './GameControls'
 
 import { Html } from '@react-three/drei'
 import Player2 from './Player2'
+import useGestureInput from '../gesture/useGestureInput'
 
 export default function Game({playerName, isDeadState,isPlaying, setIsPlaying, setIsDeadState, companyId,branchId  }) {
   const platformRef = useRef()
-  
+  const videoRef = useRef()
+const canvasRef = useRef()
+
+
+useGestureInput(videoRef, canvasRef, {
+  onMoveLeft: () => gestureControlsRef.current.moveRight?.(),
+  onMoveRight: () => gestureControlsRef.current.moveLeft?.(),
+  onJump: () => gestureControlsRef.current.jump?.()
+})
+
+const gestureControlsRef = useRef({})
 
   return (
     <>
@@ -78,9 +89,31 @@ export default function Game({playerName, isDeadState,isPlaying, setIsPlaying, s
             setIsPlaying={setIsPlaying}
             setIsDeadState={setIsDeadState}
             companyId={companyId}
+            setGestureControls={(controls) => {
+    gestureControlsRef.current = controls
+  }}
           />
         </Suspense>
       </Canvas>
+      <video
+  ref={videoRef}
+  style={{ display: "none" }}
+  playsInline
+/>
+
+<canvas
+  ref={canvasRef}
+  width={640}
+  height={480}
+  style={{
+    position: "absolute",
+    top: 20,
+    left: 20,
+    width: "300px",
+    height: "220px",
+    zIndex: 10
+  }}
+/>
     </>
   )
 }
